@@ -1,0 +1,96 @@
+<?php
+require_once __DIR__ . '/php/auth.php';
+protegerPaginaAdministrativa();
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Servicios - New Talent Loans</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="Imagenes/NewTalentLoans.png">
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <link rel="stylesheet" href="estilos/StylesServicios.css">
+</head>
+<body>
+
+    <!-- Encabezado Superior -->
+    <header class="top-header">
+        <!-- Logo pegado a la esquina izquierda -->
+        <div class="logo-container">
+            <div class="logo-white-bg">
+                <img src="Imagenes/NewTalentLoans.png" alt="Logo New Talent" class="logo-img">
+            </div>
+        </div>
+        
+        <!-- Información del Usuario -->
+        <div class="user-info">
+            <div class="user-avatar"></div>
+            <span class="user-name">Nombre del Admin</span>
+        </div>
+    </header>
+
+    <!-- Contenido Principal -->
+    <main class="main-content">
+        
+        <!-- Mensaje de Bienvenida -->
+        <h1 class="welcome-message">¡Bienvenidos(a), "Nombre de Usuario" al Sistema de Prestamos New Talent Loans!</h1>
+
+        <!-- Sección de Servicios (Fieldset) -->
+        <fieldset class="services-box">
+            <legend>Area de Servicios</legend>
+            
+            <div class="buttons-grid">
+                
+                <!-- Botón 1: Panel Principal -->
+                <a href="panel-principal.php" class="service-btn">
+                    <ion-icon name="desktop-outline"></ion-icon>
+                    <span>Panel Principal</span>
+                </a>
+
+                <!-- Botón 2: Clientes -->
+                <a href="clientes.php" class="service-btn">
+                    <ion-icon name="people-outline"></ion-icon>
+                    <span>Clientes</span>
+                </a>
+
+                <a href="gestion-creditos.php?recurso=solicitudes" class="service-btn">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <span>Revisar Solicitudes</span>
+                </a>
+                <!-- Botón 3: Prestamos -->
+                <a href="prestamos.php" class="service-btn">
+                    <ion-icon name="cash-outline"></ion-icon>
+                    <span>Prestamos</span>
+                </a>
+
+                <!-- Botón 4: Pagos -->
+                <a href="pagos.php" class="service-btn">
+                    <ion-icon name="card-outline"></ion-icon>
+                    <span>Pagos</span>
+                </a>
+
+                <!-- Botón 5: Reportes -->
+                <a href="reportes.php" class="service-btn">
+                    <ion-icon name="bar-chart-outline"></ion-icon>
+                    <span>Reportes</span>
+                </a>
+
+                <!-- Botón 6: Configuración -->
+                <a href="configuracion.php" class="service-btn">
+                    <ion-icon name="settings-outline"></ion-icon>
+                    <span>Configuración</span>
+                </a>
+
+            </div>
+        </fieldset>
+
+    </main>
+
+    <!-- Pie de página verde oliva -->
+    <footer class="bottom-footer"></footer>
+
+</body>
+</html>

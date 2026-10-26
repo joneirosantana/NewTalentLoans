@@ -1,0 +1,272 @@
+{
+    "secuencias": {
+        "Solicitud": 3,
+        "Prestamo": 3,
+        "Cuota": 1,
+        "Pago": 1,
+        "TipoPrestamo": 3,
+        "EstadoPrestamo": 6,
+        "MetodoPago": 3,
+        "Garante": 2,
+        "Facturacion": 1,
+        "Pais": 4,
+        "Provincia": 4,
+        "Ciudad": 4,
+        "Direccion": 4,
+        "Acceso": 4,
+        "Usuario": 4,
+        "Telefono": 4,
+        "Correo": 4
+    },
+    "Solicitud": [
+        {
+            "Solicitud_UsuarioId": 2,
+            "Solicitud_Fecha": "2026-10-26",
+            "Solicitud_Monto": "1000000",
+            "Solicitud_Plazo": "12",
+            "Solicitud_Motivo": "superacion personal",
+            "Solicitud_Estado": "Aprobada",
+            "Solicitud_ID": 1
+        },
+        {
+            "Solicitud_UsuarioId": 3,
+            "Solicitud_Fecha": "2026-10-26",
+            "Solicitud_Monto": "1000000",
+            "Solicitud_Plazo": "18",
+            "Solicitud_Motivo": "superacion personal",
+            "Solicitud_Estado": "Aprobada",
+            "Solicitud_TipoPrestamoId": "2",
+            "Solicitud_MetodoPagoId": "2",
+            "Solicitud_GaranteNombre": "Samuel",
+            "Solicitud_GaranteCedula": "401231313131",
+            "Solicitud_GaranteTelefono": "8093332222",
+            "Solicitud_ID": 2
+        }
+    ],
+    "Prestamo": [
+        {
+            "Prestamo_SolicitudId": "1",
+            "Prestamo_TipoPrestamoId": "1",
+            "Prestamo_EstadoPrestamoId": 4,
+            "Prestamo_ID": 1
+        },
+        {
+            "Prestamo_SolicitudId": "2",
+            "Prestamo_TipoPrestamoId": "2",
+            "Prestamo_EstadoPrestamoId": 4,
+            "Prestamo_Monto": 1000000,
+            "Prestamo_Tasa": 15,
+            "Prestamo_Plazo": 18,
+            "Prestamo_Saldo": 1122926.1707730065,
+            "Prestamo_ID": 2
+        }
+    ],
+    "Cuota": [],
+    "Pago": [],
+    "TipoPrestamo": [
+        {
+            "TipoPrestamo_ID": 1,
+            "TipoPrestamo_Nombre": "Personal",
+            "TipoPrestamo_TasaBase": 12
+        },
+        {
+            "TipoPrestamo_ID": 2,
+            "TipoPrestamo_Nombre": "Comercial",
+            "TipoPrestamo_TasaBase": 15
+        }
+    ],
+    "EstadoPrestamo": [
+        {
+            "EstadoPrestamo_ID": 1,
+            "EstadoPrestamo_Nombre": "Pendiente"
+        },
+        {
+            "EstadoPrestamo_ID": 2,
+            "EstadoPrestamo_Nombre": "Aprobado"
+        },
+        {
+            "EstadoPrestamo_ID": 3,
+            "EstadoPrestamo_Nombre": "Rechazado"
+        },
+        {
+            "EstadoPrestamo_ID": 4,
+            "EstadoPrestamo_Nombre": "Activo"
+        },
+        {
+            "EstadoPrestamo_ID": 5,
+            "EstadoPrestamo_Nombre": "Finalizado"
+        }
+    ],
+    "MetodoPago": [
+        {
+            "MetodoPago_ID": 1,
+            "MetodoPago_Nombre": "Efectivo",
+            "MetodoPago_Descripcion": "Pago en efectivo"
+        },
+        {
+            "MetodoPago_ID": 2,
+            "MetodoPago_Nombre": "Transferencia",
+            "MetodoPago_Descripcion": "Transferencia bancaria"
+        }
+    ],
+    "Garante": [
+        {
+            "Garante_ID": 1,
+            "Garante_PrestamoId": 2,
+            "Garante_Nombre": "Samuel",
+            "Garante_Cedula": "401231313131",
+            "Garante_Telefono": "8093332222"
+        }
+    ],
+    "Facturacion": [],
+    "Pais": [
+        {
+            "Pais_ID": 1,
+            "Pais_Nombre": "República Dominicana"
+        },
+        {
+            "Pais_Nombre": "Republica Dominicana",
+            "Pais_ID": 2
+        },
+        {
+            "Pais_Nombre": "Rep Dom",
+            "Pais_ID": 3
+        }
+    ],
+    "Provincia": [
+        {
+            "Provincia_ID": 1,
+            "Provincia_PaisId": 1,
+            "Provincia_Nombre": "Distrito Nacional"
+        },
+        {
+            "Provincia_Nombre": "San Pedro de Macoris",
+            "Provincia_PaisId": 2,
+            "Provincia_ID": 2
+        },
+        {
+            "Provincia_Nombre": "San Pedro",
+            "Provincia_PaisId": 3,
+            "Provincia_ID": 3
+        }
+    ],
+    "Ciudad": [
+        {
+            "Ciudad_ID": 1,
+            "Ciudad_ProvinciaId": 1,
+            "Ciudad_Nombre": "Santo Domingo"
+        },
+        {
+            "Ciudad_Nombre": "San Pedro de Macoris",
+            "Ciudad_ProvinciaId": 2,
+            "Ciudad_ID": 2
+        },
+        {
+            "Ciudad_Nombre": "San Pedro",
+            "Ciudad_ProvinciaId": 3,
+            "Ciudad_ID": 3
+        }
+    ],
+    "Direccion": [
+        {
+            "Direccion_ID": 1,
+            "Direccion_CiudadId": 1,
+            "Direccion_Descripcion": "Oficina de demostración"
+        },
+        {
+            "Direccion_CiudadId": 2,
+            "Direccion_Descripcion": "Juan Pablo Duarte, San Pedro de Macoris, San Pedro de Macoris",
+            "Direccion_ID": 2
+        },
+        {
+            "Direccion_CiudadId": 3,
+            "Direccion_Descripcion": "Juan Pablo Duarte, San Pedro de Macoris, San Pedro de Macoris",
+            "Direccion_ID": 3
+        }
+    ],
+    "Acceso": [
+        {
+            "Acceso_ID": 1,
+            "Acceso_RolId": 1,
+            "Acceso_Correo": "admin@newtalentloans.local",
+            "Acceso_ContrasenaHash": "$2y$10$G\/bSXxAAxwv3xCWAb\/bXfuH8.CWgZdrQo3OmjkW6nk9jVI4z6h9KO",
+            "Acceso_Activo": 1
+        },
+        {
+            "Acceso_RolId": 2,
+            "Acceso_Correo": "acosta@gmail.com",
+            "Acceso_ContrasenaHash": "$2y$10$hn7ENVZR1uNofIkQ09SULeu8\/15bcUuDd0B6R6AlKWq9U1InrrESG",
+            "Acceso_Activo": 1,
+            "Acceso_ID": 2
+        },
+        {
+            "Acceso_RolId": 2,
+            "Acceso_Correo": "ash@gmail.com",
+            "Acceso_ContrasenaHash": "$2y$10$Rk.n3CZAdf9Irdi00sPqhO4u.X7YG9djgCHg6u9HfvnKgDWzaBTLy",
+            "Acceso_Activo": 1,
+            "Acceso_ID": 3
+        }
+    ],
+    "Usuario": [
+        {
+            "Usuario_ID": 1,
+            "Usuario_DireccionId": 1,
+            "Usuario_AccesoId": 1,
+            "Usuario_Nombre": "Administrador",
+            "Usuario_Apellido": "Demo",
+            "Usuario_Cedula": "DEMO-ADMIN"
+        },
+        {
+            "Usuario_DireccionId": 2,
+            "Usuario_AccesoId": 2,
+            "Usuario_Nombre": "henry",
+            "Usuario_Apellido": "herrera",
+            "Usuario_Cedula": "21312313123",
+            "Usuario_ID": 2,
+            "Usuario_Sueldo": 500000
+        },
+        {
+            "Usuario_DireccionId": 3,
+            "Usuario_AccesoId": 3,
+            "Usuario_Nombre": "ash",
+            "Usuario_Apellido": "r",
+            "Usuario_Cedula": "40211093733",
+            "Usuario_Sueldo": 100000,
+            "Usuario_ID": 3
+        }
+    ],
+    "Telefono": [
+        {
+            "Telefono_ID": 1,
+            "Telefono_UsuarioId": 1,
+            "Telefono_Numero": "0000000000"
+        },
+        {
+            "Telefono_UsuarioId": 2,
+            "Telefono_Numero": "8091112222",
+            "Telefono_ID": 2
+        },
+        {
+            "Telefono_UsuarioId": 3,
+            "Telefono_Numero": "8091112222",
+            "Telefono_ID": 3
+        }
+    ],
+    "Correo": [
+        {
+            "Correo_ID": 1,
+            "Correo_UsuarioId": 1,
+            "Correo_Direccion": "admin@newtalentloans.local"
+        },
+        {
+            "Correo_UsuarioId": 2,
+            "Correo_Direccion": "acosta@gmail.com",
+            "Correo_ID": 2
+        },
+        {
+            "Correo_UsuarioId": 3,
+            "Correo_Direccion": "ash@gmail.com",
+            "Correo_ID": 3
+        }
+    ]
+}

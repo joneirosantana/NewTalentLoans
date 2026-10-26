@@ -1,0 +1,29 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f6f9; color: #263238; font-family: Montserrat, Arial, sans-serif; }
+.encabezado { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 5%; background: #087c42; color: white; }
+.encabezado a { color: white; text-decoration: none; font-weight: 700; }
+.encabezado nav { display: flex; gap: 20px; }
+.contenido { width: min(1100px, 92%); margin: 32px auto; display: grid; gap: 24px; }
+.tarjeta { background: white; padding: 28px; border-radius: 14px; box-shadow: 0 5px 20px #20304012; }
+h1, h2 { margin-top: 0; color: #087c42; }
+form { max-width: 620px; display: grid; gap: 10px; }
+label { margin-top: 8px; font-weight: 600; }
+input, textarea { width: 100%; padding: 12px; border: 1px solid #9aa5ad; border-radius: 6px; font: inherit; }
+button { justify-self: start; margin-top: 12px; padding: 12px 20px; border: 0; border-radius: 6px; color: white; background: #07954e; font: inherit; font-weight: 700; cursor: pointer; }
+button:disabled { opacity: .6; cursor: wait; }
+#mensaje { min-height: 1.5em; }
+.tabla-contenedor { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 620px; }
+th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e2e7ea; }
+th { background: #eef6f1; }
+@media (max-width: 640px) { .encabezado { flex-wrap: wrap; } .contenido { margin: 18px auto; } .tarjeta { padding: 20px; } }
+select { width: 100%; padding: 12px; border: 1px solid #9aa5ad; border-radius: 6px; font: inherit; background: white; }.acciones-formulario { display: flex; flex-wrap: wrap; gap: 10px; }
+button.secundario { color: #087c42; background: #e7f4ec; border: 1px solid #087c42; }
+.grupo-garante, .proyeccion, .resumen-prestamo { margin-top: 14px; padding: 16px; border-radius: 8px; background: #f0f7f2; }
+.grupo-garante { border-left: 4px solid #d18b00; }
+.grupo-garante h3 { margin: 0; }.contacto { display: inline-block; margin: 14px 18px 0 0; color: #087c42; font-weight: 700; }
+.dato-sueldo { font-weight: 700; }
+[hidden] { display: none !important; }
+
+.datos-contacto { padding: 10px 0; }
+.datos-contacto .contacto { margin-top: 4px; }

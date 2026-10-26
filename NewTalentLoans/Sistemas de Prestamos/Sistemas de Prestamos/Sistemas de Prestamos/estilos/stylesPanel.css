@@ -1,0 +1,452 @@
+/* =========================================
+   1. RESET Y ESTILOS GLOBALES
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* =========================================
+   2. ENCABEZADO SUPERIOR
+   ========================================= */
+.top-header {
+    background-color: #00a651;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+    z-index: 10;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0 15px;
+    height: 100%;
+}
+
+.logo-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.logo-white-bg {
+    background-color: #ffffff;
+    height: 100%;
+    padding: 0 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-img {
+    height: 70%;
+    width: auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #ffffff;
+    border-radius: 50%;
+}
+
+/* =========================================
+   3. LAYOUT PRINCIPAL (Sidebar + Contenido)
+   ========================================= */
+.app-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- MENÚ LATERAL (Sidebar) --- */
+.sidebar {
+    width: 70px; 
+    background-color: #7f9e00; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+    padding-top: 10px;
+    transition: width 0.3s ease, transform 0.3s ease; 
+    overflow: hidden; 
+    white-space: nowrap; 
+    z-index: 100;
+}
+
+.sidebar:hover {
+    width: 240px; 
+}
+
+.sidebar-nav ul {
+    list-style: none;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    transition: background-color 0.2s;
+}
+
+.sidebar-nav li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav li.active a {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-nav ion-icon {
+    font-size: 22px;
+    color: white;
+    min-width: 30px; 
+    text-align: center;
+}
+
+.sidebar-nav li a span {
+    opacity: 0;
+    transform: translateX(-10px); 
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    margin-left: 10px;
+}
+
+.sidebar:hover .sidebar-nav li a span {
+    opacity: 1;
+    transform: translateX(0); 
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    opacity: 0; 
+    transition: opacity 0.3s ease;
+    white-space: normal; 
+}
+
+.sidebar:hover .sidebar-footer {
+    opacity: 1;
+}
+
+.logged-user {
+    font-size: 13px;
+    margin-bottom: 15px;
+    font-weight: 400;
+}
+
+.logout-link {
+    color: white;
+    text-decoration: underline;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+/* =========================================
+   4. ÁREA DE CONTENIDO PRINCIPAL
+   ========================================= */
+.main-content {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 30px 40px;
+    overflow-y: auto;
+    transition: filter 0.3s ease; /* Animación para el desenfoque */
+}
+
+/* EFECTO DE DESENFOQUE AL PASAR POR EL SIDEBAR */
+.app-container:has(.sidebar:hover) .main-content {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* --- TÍTULO DE LA PÁGINA --- */
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.title-divider {
+    border: none;
+    border-top: 1px solid #000;
+    margin-bottom: 30px;
+}
+
+/* --- TARJETAS DE RESUMEN (Dashboard Cards) --- */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background-color: #ffffff;
+    border: 1px solid #000; /* Borde negro fino */
+    border-radius: 8px;
+    padding: 25px 20px;
+    /* AQUÍ ESTÁ LA SOMBRA QUE FALTABA */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15), 
+                0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.card-value {
+    font-size: 28px;
+    font-weight: 400;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.card-label {
+    font-size: 13px;
+    color: #333;
+    font-weight: 500;
+}
+
+/* --- SECCIÓN DE LA TABLA --- */
+.table-section {
+    width: 100%;
+}
+
+.table-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 10px;
+}
+
+/* Estilo del contenedor de la tabla (borde exterior) */
+.data-table {
+    width: 100%;
+    border-collapse: collapse; /* Une los bordes para que no se vean dobles */
+    border: 2px solid #000;    /* Borde exterior grueso y negro */
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil como en la imagen */
+}
+
+/* Estilo de las celdas (tanto encabezados como celdas vacías) */
+.data-table th, 
+.data-table td {
+    border: 1px solid #000; /* Líneas internas negras */
+    padding: 12px 15px;     /* Espacio interno */
+    text-align: left;
+    font-size: 14px;
+    color: #000;
+}
+
+/* Estilo específico para los encabezados (la fila de arriba) */
+.data-table th {
+    background-color: #ffffff;
+    font-weight: 500; /* No tan grueso, como en la imagen */
+    border-bottom: 2px solid #000; /* Línea un poco más gruesa debajo de los títulos */
+}
+
+/* Estilo para las filas vacías */
+.data-table td {
+    height: 45px; /* Altura para que se vean como en la imagen */
+    background-color: #ffffff;
+}
+
+/* =========================================
+   5. PIE DE PÁGINA
+   ========================================= */
+.bottom-footer {
+    height: 35px;
+    background-color: #009640; 
+    display: flex;
+    justify-content: flex-end; 
+    align-items: center;
+    padding-right: 30px;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 10;
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-content .divider {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-content ion-icon {
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+/* =========================================
+   6. MEDIA QUERIES (RESPONSIVE)
+   ========================================= */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 60px; 
+        left: 0;
+        height: calc(100vh - 60px); 
+        width: 250px;
+        transform: translateX(-100%); 
+        box-shadow: 2px 0 10px rgba(0,0,0,0.2); 
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar:hover {
+        width: 250px; 
+    }
+
+    .sidebar-nav li a span,
+    .sidebar-footer {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .dashboard-cards {
+        grid-template-columns: 1fr; 
+        gap: 20px;
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .bottom-footer {
+        justify-content: center;
+        padding-right: 0;
+        height: auto;
+        padding: 10px;
+    }
+    
+    .footer-content {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+/* =========================================
+   8. MODAL PERSONALIZADO
+   ========================================= */
+.modal-overlay {
+    display: none; /* Oculto por defecto */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo oscuro semitransparente */
+    z-index: 1000; /* Por encima de todo */
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Cuando el modal está activo */
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-box {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-box {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00963f; /* Verde de la marca */
+    margin-bottom: 15px;
+}
+
+.modal-message {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.modal-btn {
+    background-color: #00963f;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.modal-btn:hover {
+    background-color: #007a33;
+}
+
+.modal-btn:active {
+    transform: scale(0.98);
+}

@@ -1,0 +1,700 @@
+/* =========================================
+   1. RESET Y ESTILOS GLOBALES
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* =========================================
+   2. ENCABEZADO SUPERIOR
+   ========================================= */
+.top-header {
+    background-color: #00a651;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+    z-index: 10;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0 15px;
+    height: 100%;
+}
+
+.logo-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.logo-white-bg {
+    background-color: #ffffff;
+    height: 100%;
+    padding: 0 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-img {
+    height: 70%;
+    width: auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #ffffff;
+    border-radius: 50%;
+}
+
+/* =========================================
+   3. LAYOUT PRINCIPAL (Sidebar + Contenido)
+   ========================================= */
+.app-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* --- MENÚ LATERAL (Sidebar) --- */
+.sidebar {
+    width: 70px;
+    background-color: #7f9e00;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+    padding-top: 10px;
+    transition: width 0.3s ease, transform 0.3s ease;
+    overflow: hidden;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.sidebar:hover {
+    width: 240px;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    transition: background-color 0.2s;
+}
+
+.sidebar-nav li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav li.active a {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-nav ion-icon {
+    font-size: 22px;
+    color: white;
+    min-width: 30px;
+    text-align: center;
+}
+
+.sidebar-nav li a span {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    margin-left: 10px;
+}
+
+.sidebar:hover .sidebar-nav li a span {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    white-space: normal;
+}
+
+.sidebar:hover .sidebar-footer {
+    opacity: 1;
+}
+
+.logged-user {
+    font-size: 13px;
+    margin-bottom: 15px;
+    font-weight: 400;
+}
+
+.logout-link {
+    color: white;
+    text-decoration: underline;
+    font-size: 13px;
+    font-weight: 400;
+}
+
+/* =========================================
+   4. ÁREA DE CONTENIDO PRINCIPAL
+   ========================================= */
+.main-content {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 30px 40px;
+    overflow-y: auto;
+    transition: filter 0.3s ease;
+}
+
+/* EFECTO DE DESENFOQUE AL PASAR POR EL SIDEBAR */
+.app-container:has(.sidebar:hover) .main-content {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+}
+
+/* --- TÍTULO DE LA PÁGINA --- */
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.title-divider {
+    border: none;
+    border-top: 1px solid #000;
+    margin-bottom: 30px;
+}
+
+/* =========================================
+   5. GESTIÓN DE CLIENTES
+   ========================================= */
+.gestion-clientes-box {
+    border: 1px solid #000;
+    border-radius: 4px;
+    background-color: #fff;
+    padding: 25px 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.gestion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.gestion-titulo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.btn-nuevo-cliente {
+    background-color: #00a651;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+}
+
+.btn-nuevo-cliente:hover {
+    background-color: #008a43;
+    box-shadow: 0 6px 12px rgba(0, 150, 63, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-nuevo-cliente ion-icon {
+    font-size: 20px;
+}
+
+/* Tabla */
+.tabla-clientes {
+    width: 100%;
+    border-collapse: collapse;
+    border: 1px solid #000;
+    background-color: #fff;
+}
+
+.tabla-clientes th,
+.tabla-clientes td {
+    border: 1px solid #000;
+    padding: 14px 18px;
+    text-align: left;
+    font-size: 13.5px;
+    color: #000;
+}
+
+.tabla-clientes th {
+    background-color: #ffffff;
+    font-weight: 500;
+    border-bottom: 2px solid #000;
+}
+
+.tabla-clientes td {
+    height: 50px;
+    background-color: #ffffff;
+}
+
+.acciones-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-accion {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 5px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.btn-editar { color: #00963f; }
+.btn-editar:hover { background-color: #e6f7ec; }
+
+.btn-eliminar { color: #e74c3c; }
+.btn-eliminar:hover { background-color: #fde8e6; }
+
+.tabla-vacia {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-style: italic;
+}
+
+/* =========================================
+   6. PIE DE PÁGINA
+   ========================================= */
+.bottom-footer {
+    height: 35px;
+    background-color: #009640;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 30px;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 10;
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-content .divider {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-content ion-icon {
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+/* =========================================
+   7. MODALES
+   ========================================= */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 20px;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+/* Modal de mensajes SIEMPRE encima */
+.modal-mensajes {
+    z-index: 3000;
+}
+
+/* Modal del formulario debajo del de mensajes */
+.modal-formulario {
+    z-index: 2000;
+}
+
+.modal-box {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.modal-overlay.active .modal-box {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00963f;
+    margin-bottom: 15px;
+}
+
+.modal-message {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.modal-btn {
+    background-color: #00963f;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.modal-btn:hover { background-color: #007a33; }
+.modal-btn:active { transform: scale(0.98); }
+
+/* =========================================
+   8. MODAL CON FORMULARIO
+   ========================================= */
+.modal-box-form {
+    max-width: 600px !important;
+    text-align: left !important;
+    padding: 35px 30px 30px 30px !important;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    color: #999;
+    cursor: pointer;
+    transition: color 0.3s, transform 0.2s;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+
+.modal-close:hover {
+    color: #00963f;
+    background-color: #f0f8f4;
+    transform: rotate(90deg);
+}
+
+.modal-subtitle {
+    font-size: 13px;
+    color: #777;
+    margin-bottom: 25px;
+    margin-top: -8px;
+}
+
+.form-cliente {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.form-cliente .input-group {
+    position: relative;
+    width: 100%;
+    text-align: left;
+}
+
+.form-cliente .input-group input {
+    width: 100%;
+    padding: 14px 15px;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+    color: #333;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.form-cliente .input-group input:focus {
+    border-color: #00963f;
+    box-shadow: 0 0 0 3px rgba(0, 150, 63, 0.1);
+}
+
+.form-cliente .input-group label {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #fff;
+    padding: 0 6px;
+    color: #777;
+    font-size: 13.5px;
+    transition: 0.3s ease all;
+    pointer-events: none;
+}
+
+.form-cliente .input-group input:focus + label,
+.form-cliente .input-group input:not(:placeholder-shown) + label {
+    top: 0;
+    font-size: 11.5px;
+    color: #00963f;
+    font-weight: 700;
+}
+
+.form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 10px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.btn-cancelar {
+    background-color: #f0f0f0;
+    color: #555;
+    border: none;
+    padding: 12px 25px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    transition: background-color 0.3s;
+}
+
+.btn-cancelar:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-guardar {
+    background-color: #00a651;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+}
+
+.btn-guardar:hover {
+    background-color: #008a43;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 150, 63, 0.4);
+}
+
+.btn-guardar:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-guardar ion-icon {
+    font-size: 18px;
+}
+
+/* =========================================
+   9. MEDIA QUERIES (RESPONSIVE)
+   ========================================= */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        width: 250px;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar:hover {
+        width: 250px;
+    }
+
+    .sidebar-nav li a span,
+    .sidebar-footer {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .gestion-clientes-box {
+        padding: 20px 15px;
+        overflow-x: auto;
+    }
+
+    .gestion-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+
+    .gestion-titulo {
+        font-size: 18px;
+    }
+
+    .btn-nuevo-cliente {
+        padding: 10px 18px;
+        font-size: 14px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .tabla-clientes {
+        min-width: 700px;
+    }
+
+    .tabla-clientes th,
+    .tabla-clientes td {
+        padding: 10px 12px;
+        font-size: 12.5px;
+    }
+
+    .bottom-footer {
+        justify-content: center;
+        padding-right: 0;
+        height: auto;
+        padding: 10px;
+    }
+
+    .footer-content {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .modal-box-form {
+        padding: 30px 20px 20px 20px !important;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 18px;
+    }
+
+    .form-buttons {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+
+    .btn-cancelar,
+    .btn-guardar {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .modal-title {
+        font-size: 18px;
+    }
+}

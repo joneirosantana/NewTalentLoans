@@ -1,0 +1,357 @@
+/* =========================================
+   RESET Y ESTILOS GLOBALES
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #f4f6f9;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* =========================================
+   LA TARJETA DEL REGISTRO
+   ========================================= */
+.registro-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 420px;
+    padding: 30px 35px 40px 35px;
+    border-radius: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15), 
+                0 5px 15px rgba(0, 0, 0, 0.08);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Flecha para volver */
+.btn-volver {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 24px;
+    color: #000;
+    transition: transform 0.2s;
+    z-index: 10;
+}
+
+.btn-volver:hover {
+    transform: scale(1.1);
+}
+
+/* Título */
+.titulo {
+    color: #00963f;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    margin-top: 10px;
+}
+
+/* Texto descriptivo */
+.descripcion {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 30px;
+    line-height: 1.5;
+    text-align: left;
+    padding: 0 10px;
+}
+
+/* =========================================
+   ANIMACIÓN DE LOS PASOS
+   ========================================= */
+.paso {
+    display: none;
+}
+
+.paso.activo {
+    display: block;
+    animation: deslizar 0.4s ease forwards;
+}
+
+@keyframes deslizar {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* =========================================
+   INPUTS (FLOATING LABEL - FUNCIONA SIEMPRE)
+   ========================================= */
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+    width: 100%;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1.5px solid #333;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    outline: none;
+    background: transparent;
+    color: #333;
+    transition: border-color 0.3s;
+}
+
+/* Etiqueta - Estado inicial (en el centro) */
+.input-group label {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #fff;
+    padding: 0 5px;
+    color: #555;
+    font-size: 14px;
+    transition: 0.3s ease all;
+    pointer-events: none;
+}
+
+/* =========================================
+   LA CLAVE: Cuando el input tiene foco o es válido
+   (:valid funciona con el atributo required)
+   ========================================= */
+.input-group input:focus + label,
+.input-group input:valid + label {
+    top: 0;
+    font-size: 12px;
+    color: #333;
+    font-weight: 500;
+}
+
+.input-group input:focus {
+    border-color: #00963f;
+}
+
+/* =========================================
+   BOTÓN REGISTRAR / SIGUIENTE
+   ========================================= */
+.btn-registrar {
+    background-color: #00a651;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 17px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s;
+    width: 100%;
+    max-width: 220px;
+    margin-top: 10px;
+}
+
+.btn-registrar:hover {
+    background-color: #008a43;
+}
+
+.btn-registrar:active {
+    transform: scale(0.98);
+}
+
+/* =========================================
+   MODAL PERSONALIZADO
+   ========================================= */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-box {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-box {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00963f;
+    margin-bottom: 15px;
+}
+
+.modal-message {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.modal-btn {
+    background-color: #00963f;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.modal-btn:hover {
+    background-color: #007a33;
+}
+
+.modal-btn:active {
+    transform: scale(0.98);
+}
+
+/* =========================================
+   CHECKBOX DE TÉRMINOS Y CONDICIONES
+   ========================================= */
+.terminos-box {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.checkbox-container {
+    display: flex;
+    align-items: flex-start;
+    cursor: pointer;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    user-select: none;
+}
+
+.checkbox-container input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    min-width: 20px;
+    height: 20px;
+    background-color: #fff;
+    border: 2px solid #333;
+    border-radius: 4px;
+    margin-right: 12px;
+    margin-top: 1px;
+    position: relative;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+/* Checkbox marcado */
+.checkbox-container input[type="checkbox"]:checked + .checkmark {
+    background-color: #00a651;
+    border-color: #00a651;
+}
+
+.checkbox-container input[type="checkbox"]:checked + .checkmark::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.terminos-texto {
+    flex: 1;
+}
+
+.terminos-texto a {
+    color: #00963f;
+    text-decoration: underline;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.terminos-texto a:hover {
+    color: #007a33;
+}
+
+/* =========================================
+   MODAL GRANDE PARA TÉRMINOS
+   ========================================= */
+.modal-box-grande {
+    max-width: 550px !important;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    padding: 25px !important;
+}
+
+.terminos-contenido {
+    overflow-y: auto;
+    text-align: left;
+    max-height: 55vh;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #333;
+    border: 1px solid #e0e0e0;
+}
+
+.terminos-contenido p {
+    margin-bottom: 12px;
+}
+
+.terminos-contenido strong {
+    color: #00963f;
+    font-size: 14px;
+}

@@ -1,0 +1,4 @@
+Options -Indexes
+<Files "README.md">
+    Require all denied
+</Files>

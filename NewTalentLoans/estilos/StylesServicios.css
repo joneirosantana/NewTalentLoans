@@ -1,0 +1,311 @@
+/* =========================================
+   RESET Y ESTILOS GLOBALES
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* =========================================
+   ENCABEZADO SUPERIOR
+   ========================================= */
+.top-header {
+    background-color: #00963f;
+    height: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 40px;
+    padding-left: 0;
+}
+
+/* --- CONTENEDOR DEL LOGO --- */
+.logo-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+/* --- FONDO BLANCO DEL LOGO --- */
+.logo-white-bg {
+    background-color: #ffffff;
+    height: 100%;
+    padding: 0 9px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- IMAGEN DEL LOGO --- */
+.logo-img {
+    height: 65%;
+    width: auto;
+    object-fit: contain;
+}
+
+/* --- INFORMACIÓN DEL USUARIO --- */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+    flex-shrink: 0;
+    max-width: 50%;
+    overflow: hidden;
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    background-color: #ffffff;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.user-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* =========================================
+   CONTENIDO PRINCIPAL
+   ========================================= */
+.main-content {
+    flex: 1;
+    padding: 30px 60px;
+    background-color: #ffffff;
+}
+
+.welcome-message {
+    font-size: 18px;
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 10px;
+    display: inline-block;
+    width: 100%;
+}
+
+/* =========================================
+   CAJA DE SERVICIOS (FIELDSET)
+   ========================================= */
+.services-box {
+    border: 1px solid #999;
+    padding: 40px 20px;
+    border-radius: 4px;
+    position: relative;
+    background-color: #fff;
+}
+
+.services-box legend {
+    font-size: 16px;
+    color: #555;
+    padding: 0 10px;
+    margin-left: 20px;
+}
+
+/* =========================================
+   GRID DE BOTONES
+   ========================================= */
+.buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 50px 40px;
+    padding: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* =========================================
+   ESTILO DE LOS BOTONES
+   ========================================= */
+.service-btn {
+    background-color: transparent;
+    border: 3px solid #1a2e56;
+    border-radius: 25px;
+    padding: 20px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a2e56;
+    transition: all 0.3s ease;
+    min-height: 110px;
+    text-decoration: none;
+}
+
+.service-btn ion-icon {
+    font-size: 28px;
+    color: #1a2e56;
+}
+
+.service-btn:hover {
+    background-color: #f0f8ff;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.service-btn:active {
+    transform: translateY(0);
+}
+
+/* =========================================
+   PIE DE PÁGINA
+   ========================================= */
+.bottom-footer {
+    height: 40px;
+    background-color: #7c9e00;
+    width: 100%;
+}
+
+/* =========================================
+   RESPONSIVE - TABLETS (max 900px)
+   ========================================= */
+@media (max-width: 900px) {
+    .buttons-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 30px;
+    }
+
+    .main-content {
+        padding: 25px 40px;
+    }
+
+    .welcome-message {
+        font-size: 16px;
+    }
+
+    .service-btn {
+        min-height: 100px;
+        font-size: 15px;
+        padding: 18px 12px;
+    }
+
+    .service-btn ion-icon {
+        font-size: 26px;
+    }
+}
+
+/* =========================================
+   RESPONSIVE - MÓVILES (max 600px)
+   ========================================= */
+@media (max-width: 600px) {
+    /* Header más compacto */
+    .top-header {
+        height: 60px;
+        padding-right: 12px;
+        padding-left: 0;
+    }
+
+    .logo-white-bg {
+        padding: 0 7px;
+    }
+
+    .logo-img {
+        height: 55%;
+    }
+
+    .user-info {
+        font-size: 12px;
+        gap: 6px;
+        max-width: 55%;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
+    }
+
+    /* Contenido principal */
+    .main-content {
+        padding: 15px 12px;
+    }
+
+    .welcome-message {
+        font-size: 13px;
+        margin-bottom: 20px;
+        padding-bottom: 8px;
+        line-height: 1.4;
+    }
+
+    /* Caja de servicios */
+    .services-box {
+        padding: 20px 10px;
+    }
+
+    .services-box legend {
+        font-size: 13px;
+        margin-left: 8px;
+        padding: 0 8px;
+    }
+
+    /* Grid de botones: 1 columna */
+    .buttons-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        padding: 5px;
+    }
+
+    /* Botones más compactos con icono a la izquierda */
+    .service-btn {
+        min-height: 70px;
+        padding: 15px 18px;
+        font-size: 14px;
+        border-radius: 18px;
+        gap: 12px;
+        justify-content: flex-start;
+    }
+
+    .service-btn ion-icon {
+        font-size: 22px;
+        min-width: 26px;
+    }
+
+    /* Footer más delgado */
+    .bottom-footer {
+        height: 25px;
+    }
+}
+
+/* =========================================
+   RESPONSIVE - MÓVILES PEQUEÑOS (max 380px)
+   ========================================= */
+@media (max-width: 380px) {
+    .user-name {
+        display: none; /* Ocultamos el nombre en pantallas muy pequeñas */
+    }
+
+    .welcome-message {
+        font-size: 12px;
+    }
+
+    .service-btn {
+        font-size: 13px;
+        padding: 12px 15px;
+        min-height: 65px;
+    }
+
+    .service-btn ion-icon {
+        font-size: 20px;
+    }
+}

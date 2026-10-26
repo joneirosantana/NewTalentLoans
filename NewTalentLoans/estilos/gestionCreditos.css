@@ -1,0 +1,28 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #f4f6f9; color: #263238; font-family: Montserrat, Arial, sans-serif; }
+.encabezado { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 5%; background: #087c42; color: #fff; }
+.encabezado a { color: #fff; text-decoration: none; font-weight: 700; }
+.encabezado nav { display: flex; gap: 20px; }
+.contenido { width: min(1200px, 94%); margin: 28px auto; display: grid; gap: 20px; }
+.tarjeta { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 5px 20px #20304012; }
+h1, h2 { margin-top: 0; color: #087c42; }
+label { font-weight: 600; }
+select, input { width: 100%; padding: 11px; border: 1px solid #9aa5ad; border-radius: 6px; font: inherit; }
+#recurso { max-width: 420px; }
+.campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+.campo { display: grid; gap: 7px; }
+.acciones { display: flex; gap: 10px; margin-top: 18px; }
+button { border: 0; border-radius: 6px; background: #07954e; color: white; padding: 11px 16px; font: inherit; font-weight: 700; cursor: pointer; }
+button.secundario { background: #56636a; }
+button.eliminar { background: #a52b2b; padding: 7px 10px; }
+button.editar { background: #386d9a; padding: 7px 10px; }
+button:disabled { opacity: .6; cursor: wait; }
+#estado { min-height: 1.4em; }
+.tabla-contenedor { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 720px; }
+th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e7ea; }
+th { background: #eef6f1; }
+td.acciones-celda { white-space: nowrap; display: flex; gap: 7px; }
+@media (max-width: 620px) { .encabezado { flex-wrap: wrap; } .tarjeta { padding: 18px; } }
+.acciones-celda select { min-width: 150px; padding: 8px; border: 1px solid #9aa5ad; border-radius: 6px; font: inherit; }
+.acciones-celda { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }

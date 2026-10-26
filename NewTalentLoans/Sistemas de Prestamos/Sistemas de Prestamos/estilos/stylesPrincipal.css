@@ -1,0 +1,219 @@
+/* =========================================
+   1. RESET Y ESTILOS GLOBALES
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* =========================================
+   2. LA TARJETA DEL FORMULARIO
+   ========================================= */
+.login-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 400px;
+    padding: 40px 30px;
+    border-radius: 30px;
+    box-shadow: 0px 20px 20px 12px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    border: 1px solid #e0e0e0;
+}
+
+/* =========================================
+   3. LOGO Y TEXTO
+   ========================================= */
+.logo img {
+    max-width: 200px;
+    margin-bottom: 30px;
+    height: auto;
+}
+
+.instruction {
+    color: #333;
+    font-size: 15px;
+    margin-bottom: 35px;
+    font-weight: 500;
+}
+
+/* =========================================
+   4. INPUTS (CON ANIMACIÓN FLOATING LABEL)
+   ========================================= */
+.input-group {
+    position: relative;
+    margin-bottom: 25px;
+    width: 100%;
+    text-align: left;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1.5px solid #333;
+    border-radius: 4px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 15px;
+    outline: none;
+    background: transparent;
+    color: #333;
+    transition: border-color 0.3s;
+}
+
+/* Etiqueta (Label) - Estado inicial en el centro */
+.input-group label {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #fff;
+    padding: 0 5px;
+    color: #555;
+    font-size: 14px;
+    transition: 0.3s ease all;
+    pointer-events: none;
+}
+
+/* =========================================
+   LA REGLA CLAVE: 
+   Cuando el input tiene texto (:not(:placeholder-shown))
+   O cuando tiene el foco (:focus)
+   La etiqueta sube arriba.
+   ========================================= */
+.input-group input:focus + label,
+.input-group input:not(:placeholder-shown) + label {
+    top: 0;
+    font-size: 12px;
+    color: #00963f;
+    font-weight: 700;
+}
+
+/* Cambiar el borde cuando tiene foco */
+.input-group input:focus {
+    border-color: #00963f;
+}
+
+/* =========================================
+   5. ENLACES
+   ========================================= */
+.links {
+    margin-bottom: 30px;
+    font-size: 12px;
+    color: #333;
+    line-height: 1.8;
+    text-align: center;
+}
+
+.links a {
+    color: #333;
+    text-decoration: underline;
+    font-weight: 500;
+}
+
+/* =========================================
+   6. BOTÓN
+   ========================================= */
+.btn-login {
+    background-color: #00a651;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 18px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+    width: auto;
+    min-width: 200px;
+}
+
+.btn-login:hover {
+    background-color: #008a43;
+}
+
+/* =========================================
+   MODAL PERSONALIZADO
+   ========================================= */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-box {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-box {
+    transform: scale(1);
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #00963f;
+    margin-bottom: 15px;
+}
+
+.modal-message {
+    font-size: 15px;
+    color: #333;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.modal-btn {
+    background-color: #00963f;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s;
+}
+
+.modal-btn:hover {
+    background-color: #007a33;
+}
+
+.modal-btn:active {
+    transform: scale(0.98);
+}

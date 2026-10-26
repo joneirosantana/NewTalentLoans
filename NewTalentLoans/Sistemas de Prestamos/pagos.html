@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagos | New Talent Loans</title>
+    <link rel="icon" type="image/x-icon" href="Imagenes/NewTalentLoans.png">
+    
+    <!-- Fuente Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Ionicons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    <link rel="stylesheet" href="estilos/pagos.css">
+    <script src="scripts/pagos.js" defer></script>
+</head>
+<body>
+
+    <!-- ENCABEZADO SUPERIOR -->
+    <header class="top-header">
+        <div class="header-left">
+            <button class="menu-toggle">
+                <ion-icon name="menu-outline"></ion-icon>
+            </button>
+            <div class="logo-container">
+                <div class="logo-white-bg">
+                    <img src="Imagenes/NewTalentLoans.png" alt="Logo" class="logo-img">
+                </div>
+            </div>
+        </div>
+        
+        <div class="user-info">
+            <div class="user-avatar"></div>
+            <span class="user-name">Administrador</span>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="app-container">
+        
+        <!-- MENÚ LATERAL -->
+        <aside class="sidebar" id="sidebar">
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="PanelDeServicio.html"><ion-icon name="home-outline"></ion-icon><span>Inicio</span></a></li>
+                    <li><a href="panelPrincipal.htm"><ion-icon name="desktop-outline"></ion-icon><span>Panel Principal</span></a></li>
+                    <li><a href="cliente.html"><ion-icon name="people-outline"></ion-icon><span>Cliente</span></a></li>
+                    <li><a href="prestamos.html"><ion-icon name="cash-outline"></ion-icon><span>Prestamos</span></a></li>
+                    <li class="active"><a href="pagos.html"><ion-icon name="card-outline"></ion-icon><span>Pagos</span></a></li>
+                    <li><a href="reportes.html"><ion-icon name="bar-chart-outline"></ion-icon><span>Reportes</span></a></li>
+                    <li><a href="configuracion.html"><ion-icon name="settings-outline"></ion-icon><span>Configuración</span></a></li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <p class="logged-user">Nombre del que esta logueado</p>
+                <a href="#" class="logout-link">Cerrar Sesión</a>
+            </div>
+        </aside>
+
+        <!-- ÁREA DE CONTENIDO PRINCIPAL -->
+        <main class="main-content">
+            
+            <h2 class="page-title">Pagos</h2>
+            <hr class="title-divider">
+
+            <div class="gestion-pagos-box">
+                
+                <div class="gestion-header">
+                    <h3 class="gestion-titulo">Historial de Pagos</h3>
+                    <button class="btn-nuevo-pago" id="btnNuevoPago">
+                        <ion-icon name="add-outline"></ion-icon>
+                        Registrar Pago
+                    </button>
+                </div>
+
+                <table class="tabla-pagos" id="tablaPagos">
+                    <thead>
+                        <tr>
+                            <th>Recibo No.</th>
+                            <th>Préstamo</th>
+                            <th>Cliente</th>
+                            <th>Monto Pagado</th>
+                            <th>Fecha Pago</th>
+                            <th>Método</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbodyPagos"></tbody>
+                </table>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="bottom-footer">
+        <div class="footer-content">
+            <span>Todos los Derechos Reservados</span>
+            <span class="divider">|</span>
+            <span>New Talent Loans</span>
+            <span class="divider">|</span>
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <span>Version 1.0.1</span>
+        </div>
+    </footer>
+
+    <!-- MODAL DE MENSAJES -->
+    <div class="modal-overlay modal-mensajes" id="modalOverlay">
+        <div class="modal-box">
+            <h3 class="modal-title" id="modalTitle">Título</h3>
+            <p class="modal-message" id="modalMessage">Mensaje</p>
+            <button class="modal-btn" id="modalBtn">Aceptar</button>
+        </div>
+    </div>
+
+    <!-- MODAL CON FORMULARIO DE PAGO -->
+    <div class="modal-overlay modal-formulario" id="modalFormPago">
+        <div class="modal-box modal-box-form">
+            
+            <button class="modal-close" id="cerrarFormPago">
+                <ion-icon name="close-outline"></ion-icon>
+            </button>
+
+            <h3 class="modal-title" id="tituloFormPago">Registrar Pago</h3>
+            <p class="modal-subtitle">Complete los datos del pago</p>
+
+            <form id="formPago" class="form-pago" novalidate>
+                
+                <input type="hidden" id="pagoId" name="pagoId">
+
+                <div class="input-group">
+                    <select id="prestamo" name="prestamo" required>
+                        <option value="" disabled selected>Seleccione un préstamo</option>
+                    </select>
+                    <label for="prestamo">Préstamo:</label>
+                </div>
+
+                <div class="form-row">
+                    <div class="input-group">
+                        <input type="number" id="montoPagado" name="montoPagado" placeholder=" " min="0" step="0.01" required>
+                        <label for="montoPagado">Monto Pagado:</label>
+                    </div>
+                    <div class="input-group">
+                        <input type="date" id="fechaPago" name="fechaPago" placeholder=" " required>
+                        <label for="fechaPago">Fecha Pago:</label>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <select id="metodo" name="metodo" required>
+                        <option value="" disabled selected>Seleccione un método</option>
+                        <option value="efectivo">Efectivo</option>
+                        <option value="transferencia">Transferencia</option>
+                        <option value="tarjeta">Tarjeta</option>
+                        <option value="cheque">Cheque</option>
+                    </select>
+                    <label for="metodo">Método de Pago:</label>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="btn-cancelar" id="btnCancelarForm">Cancelar</button>
+                    <button type="submit" class="btn-guardar" id="btnGuardarPago">
+                        <ion-icon name="save-outline"></ion-icon>
+                        Guardar Pago
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+</body>
+</html>

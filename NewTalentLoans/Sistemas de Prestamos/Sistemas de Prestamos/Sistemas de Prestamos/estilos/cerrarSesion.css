@@ -1,0 +1,126 @@
+/* =========================================
+   RESET Y ESTILOS GLOBALES
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* =========================================
+   LOGO EN LA ESQUINA SUPERIOR IZQUIERDA
+   ========================================= */
+.logo-esquina {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+}
+
+.logo-esquina img {
+    height: 50px;
+    width: auto;
+}
+
+/* =========================================
+   TARJETA CENTRAL
+   ========================================= */
+.cerrar-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cerrar-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 450px;
+    padding: 35px 40px 40px;
+    border-radius: 12px;
+    border: 1px solid #d0d0d0;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15), 
+                0 3px 10px rgba(0, 0, 0, 0.08);
+    text-align: left;
+}
+
+.cerrar-titulo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #00963f;
+    line-height: 1.35;
+    margin-bottom: 15px;
+}
+
+.cerrar-mensaje {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    font-weight: 400;
+}
+
+/* =========================================
+   BOTÓN VOLVER
+   ========================================= */
+.btn-volver {
+    display: inline-block;
+    background-color: #00a651;
+    color: white;
+    padding: 12px 45px;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    text-decoration: none;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    box-shadow: 0 4px 8px rgba(0, 150, 63, 0.3);
+    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+    margin-left: 50%;
+    transform: translateX(-50%);
+}
+
+.btn-volver:hover {
+    background-color: #008a43;
+    box-shadow: 0 6px 12px rgba(0, 150, 63, 0.4);
+}
+
+.btn-volver:active {
+    transform: translateX(-50%) scale(0.97);
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+@media (max-width: 500px) {
+    .cerrar-card {
+        padding: 25px 25px 30px;
+    }
+
+    .cerrar-titulo {
+        font-size: 18px;
+    }
+
+    .cerrar-mensaje {
+        font-size: 13px;
+    }
+
+    .btn-volver {
+        padding: 11px 35px;
+        font-size: 15px;
+    }
+
+    .logo-esquina img {
+        height: 40px;
+    }
+}
