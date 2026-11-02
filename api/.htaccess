@@ -1,0 +1,6 @@
+Options -Indexes
+<Files ".config.php">
+    Require all denied
+</Files>
+RewriteEngine On
+RewriteRule ^(controllers|database|entity|media)/ - [F,L,NC]
