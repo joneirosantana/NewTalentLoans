@@ -1,28 +1,560 @@
-* { box-sizing: border-box; }
-body { margin: 0; background: #f4f6f9; color: #263238; font-family: Montserrat, Arial, sans-serif; }
-.encabezado { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 5%; background: #087c42; color: #fff; }
-.encabezado a { color: #fff; text-decoration: none; font-weight: 700; }
-.encabezado nav { display: flex; gap: 20px; }
-.contenido { width: min(1200px, 94%); margin: 28px auto; display: grid; gap: 20px; }
-.tarjeta { background: white; padding: 24px; border-radius: 12px; box-shadow: 0 5px 20px #20304012; }
-h1, h2 { margin-top: 0; color: #087c42; }
-label { font-weight: 600; }
-select, input { width: 100%; padding: 11px; border: 1px solid #9aa5ad; border-radius: 6px; font: inherit; }
-#recurso { max-width: 420px; }
-.campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-.campo { display: grid; gap: 7px; }
-.acciones { display: flex; gap: 10px; margin-top: 18px; }
-button { border: 0; border-radius: 6px; background: #07954e; color: white; padding: 11px 16px; font: inherit; font-weight: 700; cursor: pointer; }
-button.secundario { background: #56636a; }
-button.eliminar { background: #a52b2b; padding: 7px 10px; }
-button.editar { background: #386d9a; padding: 7px 10px; }
-button:disabled { opacity: .6; cursor: wait; }
-#estado { min-height: 1.4em; }
-.tabla-contenedor { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; min-width: 720px; }
-th, td { padding: 10px; text-align: left; border-bottom: 1px solid #e2e7ea; }
-th { background: #eef6f1; }
-td.acciones-celda { white-space: nowrap; display: flex; gap: 7px; }
-@media (max-width: 620px) { .encabezado { flex-wrap: wrap; } .tarjeta { padding: 18px; } }
-.acciones-celda select { min-width: 150px; padding: 8px; border: 1px solid #9aa5ad; border-radius: 6px; font: inherit; }
-.acciones-celda { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; }
+/* =========================================
+   RESET Y GLOBALES
+   ========================================= */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+/* =========================================
+   ENCABEZADO SUPERIOR
+   ========================================= */
+.top-header {
+    background-color: #00a651;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+    z-index: 10;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0 15px;
+    height: 100%;
+}
+
+.logo-container {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.logo-white-bg {
+    background-color: #ffffff;
+    height: 100%;
+    padding: 0 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-img {
+    height: 70%;
+    width: auto;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    background-color: #ffffff;
+    border-radius: 50%;
+}
+
+/* =========================================
+   LAYOUT (Menú y Contenido)
+   ========================================= */
+.app-container {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Menú Lateral */
+.sidebar {
+    width: 70px;
+    background-color: #7f9e00;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    color: white;
+    padding-top: 10px;
+    transition: width 0.3s ease;
+    overflow: hidden;
+    white-space: nowrap;
+    z-index: 100;
+}
+
+.sidebar:hover {
+    width: 240px;
+}
+
+.sidebar-nav {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    color: white;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 15px;
+    transition: background 0.2s;
+}
+
+.sidebar-nav li a:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-nav li.active a {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-nav ion-icon {
+    font-size: 22px;
+    color: white;
+    min-width: 30px;
+    text-align: center;
+}
+
+.sidebar-nav li a span {
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: 0.3s;
+    margin-left: 10px;
+}
+
+.sidebar:hover .sidebar-nav li a span {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    transition: 0.3s;
+    white-space: normal;
+}
+
+.sidebar:hover .sidebar-footer {
+    opacity: 1;
+}
+
+.logged-user {
+    font-size: 13px;
+    margin-bottom: 15px;
+    font-weight: 400;
+}
+
+.logout-link {
+    color: white;
+    text-decoration: underline;
+    font-size: 13px;
+}
+
+/* Contenido Principal */
+.main-content {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 30px 40px;
+    overflow-y: auto;
+}
+
+.app-container:has(.sidebar:hover) .main-content {
+    filter: blur(4px);
+    pointer-events: none;
+    user-select: none;
+}
+
+.page-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 5px;
+}
+
+.title-divider {
+    border: none;
+    border-top: 1px solid #000;
+    margin-bottom: 30px;
+}
+
+/* =========================================
+   CAJAS DE GESTIÓN
+   ========================================= */
+.gestion-prestamos-box {
+    border: 1px solid #000;
+    border-radius: 4px;
+    background-color: #fff;
+    padding: 25px 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.gestion-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.gestion-titulo {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+/* =========================================
+   FORMULARIOS DINÁMICOS
+   ========================================= */
+.form-prestamo {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* Grid de campos dinámicos */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+}
+
+/* Inputs con etiqueta flotante */
+.input-group {
+    position: relative;
+    width: 100%;
+    text-align: left;
+}
+
+.input-group input,
+.input-group select {
+    width: 100%;
+    padding: 14px 15px;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+    color: #333;
+    transition: 0.3s;
+    appearance: none;
+}
+
+.input-group input:focus,
+.input-group select:focus {
+    border-color: #00963f;
+    box-shadow: 0 0 0 3px rgba(0, 150, 63, 0.1);
+}
+
+.input-group label {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #fff;
+    padding: 0 6px;
+    color: #777;
+    font-size: 13.5px;
+    transition: 0.3s;
+    pointer-events: none;
+}
+
+.input-group input:focus+label,
+.input-group input:not(:placeholder-shown)+label {
+    top: 0;
+    transform: translateY(-50%);
+    font-size: 11.5px;
+    color: #00963f;
+    font-weight: 700;
+}
+
+/* Selectores */
+.input-group select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 15px;
+    padding-right: 40px;
+    cursor: pointer;
+}
+
+.input-group select.placeholder-activo {
+    color: transparent !important;
+}
+
+.input-group:has(select.placeholder-activo) label {
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    font-size: 13.5px !important;
+    color: #777 !important;
+    font-weight: 400 !important;
+}
+
+.input-group select:not(.placeholder-activo)+label {
+    top: 0 !important;
+    transform: translateY(-50%) !important;
+    font-size: 11.5px !important;
+    color: #00963f !important;
+    font-weight: 700 !important;
+}
+
+/* Botones */
+.form-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn-cancelar,
+.btn-guardar {
+    padding: 12px 25px;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: 0.3s;
+    border: none;
+}
+
+.btn-cancelar {
+    background-color: #f0f0f0;
+    color: #555;
+}
+
+.btn-cancelar:hover {
+    background-color: #e0e0e0;
+}
+
+.btn-guardar {
+    background-color: #00a651;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 150, 63, 0.3);
+}
+
+.btn-guardar:hover {
+    background-color: #008a43;
+    transform: translateY(-2px);
+}
+
+/* Botones pequeños dentro de la tabla */
+.btn-tabla {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 4px;
+    margin-right: 5px;
+    cursor: pointer;
+    color: white;
+    border: none;
+    font-weight: 600;
+}
+
+.btn-tabla.editar {
+    background-color: #386d9a;
+}
+
+.btn-tabla.editar:hover {
+    background-color: #2d577c;
+}
+
+.btn-tabla.eliminar {
+    background-color: #e74c3c;
+}
+
+.btn-tabla.eliminar:hover {
+    background-color: #c0392b;
+}
+
+/* =========================================
+   TABLA
+   ========================================= */
+.table-section {
+    width: 100%;
+    margin-top: 30px;
+}
+
+.table-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 10px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid #000;
+    background-color: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th,
+.data-table td {
+    border: 1px solid #000;
+    padding: 12px 15px;
+    text-align: left;
+    font-size: 14px;
+    color: #000;
+}
+
+.data-table th {
+    background-color: #ffffff;
+    font-weight: 500;
+    border-bottom: 2px solid #000;
+}
+
+.data-table td {
+    height: 45px;
+    background-color: #ffffff;
+}
+
+.tabla-vacia {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+    font-style: italic;
+}
+
+/* =========================================
+   PIE DE PÁGINA
+   ========================================= */
+.bottom-footer {
+    height: 35px;
+    background-color: #009640;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 30px;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    z-index: 10;
+}
+
+.footer-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.footer-content .divider {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.footer-content ion-icon {
+    font-size: 16px;
+    margin-left: 5px;
+}
+
+/* =========================================
+   RESPONSIVE
+   ========================================= */
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+
+    .user-name {
+        display: none;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        height: calc(100vh - 60px);
+        width: 250px;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar:hover {
+        width: 250px;
+    }
+
+    .sidebar-nav li a span,
+    .sidebar-footer {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+    .main-content {
+        padding: 20px;
+    }
+
+    .gestion-prestamos-box {
+        padding: 20px 15px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
+
+    .btn-cancelar,
+    .btn-guardar {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .bottom-footer {
+        justify-content: center;
+        padding-right: 0;
+        height: auto;
+        padding: 10px;
+    }
+
+    .footer-content {
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+
+    .data-table th,
+    .data-table td {
+        padding: 10px 8px;
+        font-size: 12px;
+    }
+}
