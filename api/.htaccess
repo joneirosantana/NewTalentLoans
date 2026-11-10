@@ -1,6 +1,6 @@
 Options -Indexes
-<Files ".config.php">
+<FilesMatch "^(?!index\.php$|media\.php$).*\.php$">
     Require all denied
-</Files>
+</FilesMatch>
 RewriteEngine On
-RewriteRule ^(controllers|database|entity|media)/ - [F,L,NC]
+RewriteRule ^(BLL|DAL|database|media)/ - [F,L,NC]

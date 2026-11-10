@@ -52,7 +52,7 @@ WHILE @remain>0
 BEGIN
 SET @installment=NULL;
 SET @part=NULL;
-IF @first AND @target IS NOT NULL
+IF @first=1 AND @target IS NOT NULL
 SELECT @installment=Cuota_ID, @part=Cuota_Saldo
     FROM Cuota WITH(UPDLOCK)
     WHERE Cuota_ID=@target AND Prestamo_ID=@loan AND Cuota_Saldo>0;
@@ -86,13 +86,8 @@ EstadoPrestamo_ID=CASE WHEN Prestamo_Saldo-@amount=0 THEN COALESCE((
     END), EstadoPrestamo_ID) ELSE EstadoPrestamo_ID
     END
 WHERE Prestamo_ID=@loan;
-DECLARE @receiptType INT=(
-    SELECT TOP(1) TipoFactura_ID
-    FROM TipoFactura
-    WHERE TipoFactura_Nombre=N'Recibo de pago');
-IF @receiptType IS NOT NULL
-    INSERT Factura(TipoFactura_ID, MetodoPago_ID, Factura_Monto, Factura_Descripcion, Factura_Estado, Pago_ID)
-    VALUES(@receiptType, @method, @amount, CONCAT(N'Pago del préstamo #', @loan), N'Emitida', @pid);
+/* Los pagos se reciben presencialmente. La aplicación registra la confirmación interna,
+   pero no emite recibos, facturas ni comprobantes al cliente. */
 INSERT Auditoria(Acceso_ID, Auditoria_Entidad, Auditoria_RegistroId, Auditoria_Accion, Auditoria_Detalle, Auditoria_DireccionIP)
 SELECT a.Acceso_ID, N'Pago', CONVERT(nvarchar(100), @pid), N'INSERT', CONCAT(N'Pago aplicado: ', @amount, N' al préstamo #', @loan), NULL
     FROM Cliente cl
@@ -150,9 +145,6 @@ FROM Cuota q
     SELECT Cuota_ID, SUM(PagoCuota_Monto) Monto
     FROM PagoCuota
     WHERE Pago_ID=@pid GROUP BY Cuota_ID) x ON x.Cuota_ID=q.Cuota_ID;
-UPDATE Factura
-    SET Factura_Estado=N'Anulada'
-    WHERE Pago_ID=@pid;
 UPDATE Prestamo
     SET Prestamo_Saldo=CASE WHEN EXISTS(
     SELECT 1
@@ -303,18 +295,6 @@ CREATE OR ALTER TRIGGER TR_Acceso_AfterUpdate ON Acceso AFTER
     UPDATE AS
 BEGIN
 SET NOCOUNT ON;
-IF (
-    UPDATE(Acceso_Activo) OR
-    UPDATE(Rol_ID)) AND EXISTS(
-    SELECT 1
-    FROM deleted d
-    JOIN Rol r ON r.Rol_ID=d.Rol_ID
-    WHERE r.Rol_Nombre=N'Administrador' AND d.Acceso_Activo=1) AND NOT EXISTS(
-    SELECT 1
-    FROM Acceso a
-    JOIN Rol r ON r.Rol_ID=a.Rol_ID
-    WHERE r.Rol_Nombre=N'Administrador' AND a.Acceso_Activo=1)
-    THROW 50035, N'No se puede desactivar al último administrador activo.', 1;
 INSERT Auditoria(Acceso_ID, Auditoria_Entidad, Auditoria_RegistroId, Auditoria_Accion, Auditoria_Detalle)
 SELECT i.Acceso_ID, N'Acceso', CONVERT(nvarchar(100), i.Acceso_ID), N'UPDATE', CONCAT(N'Cuenta modificada; activo: ', i.Acceso_Activo, N'; rol: ', r.Rol_Nombre, N'; correo: ', i.Acceso_Correo, CASE WHEN i.Acceso_ContrasenaHash<>d.Acceso_ContrasenaHash THEN N'; contraseña actualizada' ELSE N''
     END)

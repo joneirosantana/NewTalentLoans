@@ -7,11 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================
     // 🔌 CONFIGURACIÓN DEL BACKEND
     // ==========================================================
-    const API_URL = 'http://localhost:3000';
+    const API_URL = 'http://api.newtalentloans.local';
 
     const ENDPOINTS = {
-        obtener: `${API_URL}/api/configuracion`,
-        guardar: `${API_URL}/api/configuracion`
+        obtener: `${API_URL}/?recurso=configuracion`,
+        guardar: `${API_URL}/?recurso=configuracion`
     };
 
     // 👇 Cambia a FALSE cuando tengas tu backend listo
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '¿Estás seguro de que deseas cerrar sesión?',
                 () => {
                     localStorage.removeItem('token');
-                    fetch('api/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
+                    NTLApi.fetch('http://api.newtalentloans.local/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
                     localStorage.removeItem('usuario');
                     console.log('👋 Sesión cerrada correctamente');
                     window.location.href = 'sesion-cerrada.html';
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================
     async function peticionAPI(url, opciones = {}) {
         try {
-            const response = await fetch(url, opciones);
+            const response = await NTLApi.fetch(url, opciones);
             const data = await response.json();
             return { ok: response.ok, status: response.status, data };
         } catch (error) {

@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     async function peticion(url, opciones) {
-        var respuesta = await fetch(url, opciones || {});
+        var respuesta = await NTLApi.fetch(url, opciones || {});
         var datos = await respuesta.json();
         if (!respuesta.ok || !datos.success) throw new Error(datos.message || 'No se pudo completar la operación.');
         return datos;
@@ -82,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
     async function cargarClientes() {
         tbody.innerHTML = '<tr><td colspan="6" class="tabla-vacia">Cargando clientes...</td></tr>';
         try {
-            var resultado = await peticion('api/?recurso=clientes');
+            var resultado = await peticion('http://api.newtalentloans.local/?recurso=clientes');
             renderizarClientes(resultado.datos || []);
         } catch (error) {
             tbody.innerHTML = '<tr><td colspan="6" class="tabla-vacia">' + error.message + '</td></tr>';
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function editarCliente(id) {
         try {
-            var respuesta = await peticion('api/?recurso=clientes&id=' + encodeURIComponent(id));
+            var respuesta = await peticion('http://api.newtalentloans.local/?recurso=clientes&id=' + encodeURIComponent(id));
             abrirFormulario('editar', respuesta.cliente);
         } catch (error) {
             mostrarMensaje('No se pudo abrir el cliente', error.message);
@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
     async function desactivarCliente(id) {
         mostrarMensaje('Desactivar cliente', 'La cuenta se desactivará y dejará de aparecer en la lista. ¿Desea continuar?', async function () {
             try {
-                await peticion('api/?recurso=clientes&id=' + encodeURIComponent(id), { method: 'DELETE' });
+                await peticion('http://api.newtalentloans.local/?recurso=clientes&id=' + encodeURIComponent(id), { method: 'DELETE' });
                 await cargarClientes();
                 mostrarMensaje('Cuenta desactivada', 'El cliente ya no podrá iniciar sesión.');
             } catch (error) {
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function () {
             datos.ciudad = document.getElementById('ciudad').value.trim();
             datos.contrasena = document.getElementById('contrasenaCliente').value;
         }
-        var url = creando ? 'api/?recurso=clientes' : 'api/?recurso=clientes&id=' + encodeURIComponent(clienteId.value);
+        var url = creando ? 'http://api.newtalentloans.local/?recurso=clientes' : 'http://api.newtalentloans.local/?recurso=clientes&id=' + encodeURIComponent(clienteId.value);
         var metodo = creando ? 'POST' : 'PUT';
         try {
             document.getElementById('btnGuardarCliente').disabled = true;
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (logoutLink) logoutLink.addEventListener('click', function (evento) {
         evento.preventDefault();
         mostrarMensaje('Cerrar sesión', '¿Desea cerrar su sesión?', function () {
-            fetch('api/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
+            NTLApi.fetch('http://api.newtalentloans.local/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
             localStorage.removeItem('usuario');
             window.location.href = 'sesion-cerrada.html';
         });

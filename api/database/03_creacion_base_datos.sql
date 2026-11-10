@@ -24,24 +24,55 @@ Direccion_Sector NVARCHAR(100) NULL,
 Direccion_Descripcion NVARCHAR(500) NULL,
 FOREIGN KEY (Ciudad_ID) REFERENCES Ciudad(Ciudad_ID)
 );
+CREATE TABLE Empresa (
+Empresa_ID INT IDENTITY(1,1) PRIMARY KEY,
+Direccion_ID INT NOT NULL,
+Empresa_Nombre NVARCHAR(180) NOT NULL,
+Empresa_RNC NVARCHAR(30) NOT NULL UNIQUE,
+Empresa_Correo NVARCHAR(254) NOT NULL,
+Empresa_Telefono NVARCHAR(30) NULL,
+Empresa_Estado NVARCHAR(30) NOT NULL DEFAULT N'Activa',
+Empresa_FechaRegistro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
+FOREIGN KEY (Direccion_ID) REFERENCES Direccion(Direccion_ID)
+);
+CREATE TABLE PuntoPago (
+PuntoPago_ID INT IDENTITY(1,1) PRIMARY KEY,
+Empresa_ID INT NULL,
+PuntoPago_Nombre NVARCHAR(120) NOT NULL,
+PuntoPago_Direccion NVARCHAR(300) NOT NULL,
+PuntoPago_Horario NVARCHAR(150) NULL,
+PuntoPago_Telefono NVARCHAR(30) NULL,
+PuntoPago_Activo BIT NOT NULL DEFAULT 1,
+FOREIGN KEY (Empresa_ID) REFERENCES Empresa(Empresa_ID)
+);
 CREATE TABLE Rol (
 Rol_ID INT IDENTITY(1, 1) PRIMARY KEY,
 Rol_Nombre NVARCHAR(50) NOT NULL UNIQUE
+);
+CREATE TABLE Departamento (
+Departamento_ID INT IDENTITY(1, 1) PRIMARY KEY,
+Departamento_Nombre NVARCHAR(80) NOT NULL UNIQUE,
+Departamento_Descripcion NVARCHAR(250) NULL,
+Departamento_Activo BIT NOT NULL DEFAULT 1
 );
 -- El backend asigna Rol_ID: el autoregistro solo crea clientes; las cuentas de empleado requieren alta autorizada por un administrador.
 CREATE TABLE Acceso (
 Acceso_ID INT IDENTITY(1, 1) PRIMARY KEY,
 Rol_ID INT NOT NULL,
+Empresa_ID INT NULL,
 Acceso_Correo NVARCHAR(254) NOT NULL UNIQUE,
 Acceso_ContrasenaHash NVARCHAR(255) NOT NULL,
 Acceso_Activo BIT NOT NULL DEFAULT 1,
 Acceso_FechaCreacion DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
 FOREIGN KEY (Rol_ID) REFERENCES Rol(Rol_ID)
+,
+FOREIGN KEY (Empresa_ID) REFERENCES Empresa(Empresa_ID)
 );
 CREATE TABLE Cliente (
 Cliente_ID INT IDENTITY(1, 1) PRIMARY KEY,
 Direccion_ID INT NOT NULL,
 Acceso_ID INT NOT NULL UNIQUE,
+Empresa_ID INT NULL,
 Cliente_Nombre NVARCHAR(100) NOT NULL,
 Cliente_Apellido NVARCHAR(100) NOT NULL,
 Cliente_Cedula NVARCHAR(30) NOT NULL UNIQUE,
@@ -49,18 +80,26 @@ Cliente_Sueldo DECIMAL(18, 2) NOT NULL DEFAULT 0 CHECK (Cliente_Sueldo >= 0),
 Cliente_FechaRegistro DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
 FOREIGN KEY (Direccion_ID) REFERENCES Direccion(Direccion_ID),
 FOREIGN KEY (Acceso_ID) REFERENCES Acceso(Acceso_ID)
+,
+FOREIGN KEY (Empresa_ID) REFERENCES Empresa(Empresa_ID)
 );
 CREATE TABLE Empleado (
 Empleado_ID INT IDENTITY(1, 1) PRIMARY KEY,
 Direccion_ID INT NOT NULL,
 Acceso_ID INT NOT NULL UNIQUE,
+Departamento_ID INT NOT NULL,
+Empresa_ID INT NULL,
 Empleado_Nombre NVARCHAR(100) NOT NULL,
 Empleado_Apellido NVARCHAR(100) NOT NULL,
 Empleado_Cedula NVARCHAR(30) NOT NULL UNIQUE,
 Empleado_Cargo NVARCHAR(100) NOT NULL,
+Empleado_Estado NVARCHAR(30) NOT NULL DEFAULT N'Pendiente',
 Empleado_FechaIngreso DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
 FOREIGN KEY (Direccion_ID) REFERENCES Direccion(Direccion_ID),
+FOREIGN KEY (Departamento_ID) REFERENCES Departamento(Departamento_ID),
 FOREIGN KEY (Acceso_ID) REFERENCES Acceso(Acceso_ID)
+,
+FOREIGN KEY (Empresa_ID) REFERENCES Empresa(Empresa_ID)
 );
 CREATE TABLE Telefono (
 Telefono_ID INT IDENTITY(1, 1) PRIMARY KEY,
@@ -91,11 +130,6 @@ CREATE TABLE MetodoPago (
 MetodoPago_ID INT IDENTITY(1, 1) PRIMARY KEY,
 MetodoPago_Nombre NVARCHAR(80) NOT NULL UNIQUE,
 MetodoPago_Descripcion NVARCHAR(250) NULL
-);
-CREATE TABLE TipoFactura (
-TipoFactura_ID INT IDENTITY(1, 1) PRIMARY KEY,
-TipoFactura_Nombre NVARCHAR(100) NOT NULL UNIQUE,
-TipoFactura_Descripcion NVARCHAR(500) NULL
 );
 CREATE TABLE Moneda (
 Moneda_ID INT IDENTITY(1, 1) PRIMARY KEY,
@@ -212,19 +246,6 @@ FOREIGN KEY (Prestamo_ID) REFERENCES Prestamo(Prestamo_ID),
 FOREIGN KEY (MetodoPago_ID) REFERENCES MetodoPago(MetodoPago_ID),
 FOREIGN KEY (Empleado_ID) REFERENCES Empleado(Empleado_ID)
 );
-CREATE TABLE Factura (
-Factura_ID INT IDENTITY(1, 1) PRIMARY KEY,
-TipoFactura_ID INT NOT NULL,
-MetodoPago_ID INT NOT NULL,
-Factura_Fecha DATETIME2 NOT NULL DEFAULT SYSDATETIME(),
-Factura_Monto DECIMAL(18, 2) NOT NULL CHECK (Factura_Monto > 0),
-Factura_Descripcion NVARCHAR(500) NULL,
-Factura_Estado NVARCHAR(30) NOT NULL DEFAULT 'Emitida',
-Pago_ID INT NULL,
-FOREIGN KEY (TipoFactura_ID) REFERENCES TipoFactura(TipoFactura_ID),
-FOREIGN KEY (MetodoPago_ID) REFERENCES MetodoPago(MetodoPago_ID),
-CONSTRAINT FK_Factura_Pago FOREIGN KEY (Pago_ID) REFERENCES Pago(Pago_ID)
-);
 CREATE TABLE HistorialSolicitud (
 HistorialSolicitud_ID INT IDENTITY(1, 1) PRIMARY KEY,
 Solicitud_ID INT NOT NULL,
@@ -248,6 +269,14 @@ Auditoria_Detalle NVARCHAR(MAX) NULL,
 Auditoria_DireccionIP NVARCHAR(45) NULL,
 FOREIGN KEY (Acceso_ID) REFERENCES Acceso(Acceso_ID)
 );
+CREATE TABLE MensajeContacto (
+Mensaje_ID INT IDENTITY(1,1) PRIMARY KEY,
+Mensaje_Nombre NVARCHAR(120) NOT NULL,
+Mensaje_Correo NVARCHAR(254) NOT NULL,
+Mensaje_Texto NVARCHAR(1000) NOT NULL,
+Mensaje_Estado NVARCHAR(30) NOT NULL DEFAULT N'Pendiente',
+Mensaje_Fecha DATETIME2 NOT NULL DEFAULT SYSDATETIME()
+);
 CREATE TABLE DocumentoSolicitud (
 DocumentoSolicitud_ID INT IDENTITY(1, 1) PRIMARY KEY,
 Solicitud_ID INT NOT NULL,
@@ -270,6 +299,17 @@ CREATE INDEX IX_Pago_Prestamo ON Pago(Prestamo_ID);
 CREATE INDEX IX_Pago_Cliente ON Pago(Cliente_ID);
 CREATE INDEX IX_HistorialSolicitud_Solicitud ON HistorialSolicitud(Solicitud_ID);
 CREATE INDEX IX_DocumentoSolicitud_Solicitud ON DocumentoSolicitud(Solicitud_ID);
+GO
+CREATE VIEW vw_ClienteEstadoFinanciero AS
+SELECT c.Cliente_ID, c.Cliente_Nombre, c.Cliente_Apellido, c.Cliente_Sueldo,
+       COALESCE(SUM(p.Prestamo_Saldo), 0) AS DeudaPendiente,
+       COALESCE(SUM(CASE WHEN q.Cuota_Estado IN (N'Atrasada', N'Mora') THEN q.Cuota_Saldo ELSE 0 END), 0) AS Mora,
+       COALESCE(SUM(q.Cuota_Interes), 0) AS Interes
+FROM Cliente c
+LEFT JOIN Solicitud s ON s.Cliente_ID = c.Cliente_ID
+LEFT JOIN Prestamo p ON p.Solicitud_ID = s.Solicitud_ID
+LEFT JOIN Cuota q ON q.Prestamo_ID = p.Prestamo_ID
+GROUP BY c.Cliente_ID, c.Cliente_Nombre, c.Cliente_Apellido, c.Cliente_Sueldo;
 GO
 CREATE TABLE PagoCuota(
 PagoCuota_ID INT IDENTITY PRIMARY KEY,
@@ -298,17 +338,23 @@ ReversionDesembolso_ReferenciaExterna NVARCHAR(100) NULL,
 ReversionDesembolso_Estado NVARCHAR(20) NOT NULL DEFAULT(N'Aplicada') CHECK(ReversionDesembolso_Estado IN(N'Aplicada', N'Fallida')),
 ReversionDesembolso_Fecha DATETIME2 NOT NULL DEFAULT SYSDATETIME()
 );
-CREATE UNIQUE INDEX UQ_Factura_Pago ON Factura(Pago_ID)
-    WHERE Pago_ID IS NOT NULL;
-INSERT TipoFactura(TipoFactura_Nombre, TipoFactura_Descripcion)
-    VALUES(N'Recibo de pago', N'Recibo vinculado a un pago aplicado');
 INSERT EstadoPrestamo(EstadoPrestamo_Nombre)
     VALUES(N'Cancelado');
 GO
 /* Catálogos base para probar los flujos del sistema. */
-INSERT Rol(Rol_Nombre) VALUES(N'Administrador');
 INSERT Rol(Rol_Nombre) VALUES(N'Cliente');
-INSERT Rol(Rol_Nombre) VALUES(N'Empleado');
+INSERT Rol(Rol_Nombre) VALUES(N'RRHH');
+INSERT Rol(Rol_Nombre) VALUES(N'Contable');
+INSERT Rol(Rol_Nombre) VALUES(N'Solicitudes');
+INSERT Rol(Rol_Nombre) VALUES(N'Gerente');
+INSERT Rol(Rol_Nombre) VALUES(N'Pendiente');
+INSERT Rol(Rol_Nombre) VALUES(N'Dueño');
+INSERT Departamento(Departamento_Nombre, Departamento_Descripcion) VALUES(N'Recursos Humanos', N'Gestión de empleados y expedientes');
+INSERT Departamento(Departamento_Nombre, Departamento_Descripcion) VALUES(N'Contabilidad', N'Pagos, cuotas, recibos e impuestos');
+INSERT Departamento(Departamento_Nombre, Departamento_Descripcion) VALUES(N'Solicitudes', N'Revisión y seguimiento de solicitudes');
+INSERT Departamento(Departamento_Nombre, Departamento_Descripcion) VALUES(N'Gerencia', N'Control, revisión y métricas generales');
+INSERT PuntoPago(PuntoPago_Nombre, PuntoPago_Direccion, PuntoPago_Horario, PuntoPago_Telefono)
+VALUES(N'Oficina principal', N'Consultar dirección con servicio al cliente', N'Lunes a viernes, 8:00 a.m. a 5:00 p.m.', N'809-000-0000');
 INSERT EstadoSolicitud(EstadoSolicitud_Nombre) VALUES(N'Pendiente');
 INSERT EstadoSolicitud(EstadoSolicitud_Nombre) VALUES(N'Aprobada');
 INSERT EstadoSolicitud(EstadoSolicitud_Nombre) VALUES(N'Rechazada');

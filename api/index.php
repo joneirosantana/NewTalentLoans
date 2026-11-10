@@ -1,6 +1,19 @@
 <?php
 declare(strict_types=1);
 
+$allowedOrigins = ['http://newtalentloans.local', 'http://api.newtalentloans.local', 'http://localhost', 'http://127.0.0.1'];
+$origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
+if (in_array($origin, $allowedOrigins, true)) {
+    header('Access-Control-Allow-Origin: ' . $origin);
+    header('Access-Control-Allow-Credentials: true');
+    header('Vary: Origin');
+}
+header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
 session_set_cookie_params([
     'httponly' => true,
     'samesite' => 'Lax',
@@ -8,14 +21,17 @@ session_set_cookie_params([
 ]);
 session_start();
 
+require_once __DIR__ . '/ApiSupport.php';
 require_once __DIR__ . '/lib.php';
-require_once __DIR__ . '/controllers/AuthController.php';
-require_once __DIR__ . '/controllers/LoanController.php';
-require_once __DIR__ . '/controllers/EntityController.php';
-require_once __DIR__ . '/entity/Cliente.php';
-require_once __DIR__ . '/entity/Solicitud.php';
-require_once __DIR__ . '/entity/Pago.php';
-require_once __DIR__ . '/entity/Prestamo.php';
+require_once __DIR__ . '/admin.php';
+require_once __DIR__ . '/DAL/DatabaseConnection.php';
+require_once __DIR__ . '/DAL/DatabaseManager.php';
+require_once __DIR__ . '/DAL/Entities/EntityInterface.php';
+require_once __DIR__ . '/DAL/Entities/BaseEntity.php';
+foreach (glob(__DIR__ . '/DAL/Entities/*.php') as $entityFile) {
+    if (!in_array(basename($entityFile), ['EntityInterface.php', 'BaseEntity.php'], true)) require_once $entityFile;
+}
+foreach (glob(__DIR__ . '/BLL/Services/*.php') as $serviceFile) require_once $serviceFile;
 
 header('Cache-Control: no-store');
 
@@ -24,166 +40,212 @@ $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT) ?: null;
 
 try {
-    $db = Lib::db();
+    $db = DatabaseConnection::get();
+
+    if ($resource === 'contacto' && $method === 'POST') {
+        ApiSupport::out(201, ['success' => true, 'resultado' => lib_contact_message($db), 'message' => 'Mensaje enviado a servicio al cliente.']);
+    }
 
     if ($resource === 'registro' && $method === 'POST') {
-        Lib::out(201, [
+        ApiSupport::out(201, [
             'success' => true,
-            'usuario' => AuthController::register($db),
+            'usuario' => AuthService::register($db),
         ]);
     }
 
+    if ($resource === 'registro-empresa' && $method === 'POST') {
+        ApiSupport::out(201, ['success' => true, 'empresa' => CompanyService::register($db)]);
+    }
+
     if ($resource === 'sesion' && $method === 'POST') {
-        Lib::out(200, [
+        ApiSupport::out(200, [
             'success' => true,
-            'usuario' => AuthController::login($db),
+            'usuario' => AuthService::login($db),
         ]);
     }
 
     if ($resource === 'cerrar-sesion' && $method === 'POST') {
         if (isset($_SESSION['acceso_id'])) {
-            Lib::audit($db, 'Acceso', (string)$_SESSION['acceso_id'], 'LOGOUT');
+            ApiSupport::audit($db, 'Acceso', (string)$_SESSION['acceso_id'], 'LOGOUT');
         }
         $_SESSION = [];
         session_destroy();
-        Lib::out(200, ['success' => true]);
+        ApiSupport::out(200, ['success' => true]);
     }
 
     if ($resource === 'identidad' && $method === 'GET') {
-        Lib::requireUser();
-        Lib::out(200, [
+        ApiSupport::requireUser();
+        ApiSupport::out(200, [
             'success' => true,
-            'usuario' => ['esAdministrador' => Lib::admin()],
+            'usuario' => [
+                'esAdministrador' => ApiSupport::admin(),
+                'rol' => $_SESSION['rol'] ?? null,
+                'clienteId' => $_SESSION['cliente_id'] ?? null,
+                'empleadoId' => $_SESSION['empleado_id'] ?? null,
+                'empresaId' => $_SESSION['empresa_id'] ?? null,
+            ],
         ]);
     }
 
+    if ($resource === 'empresas' && $method === 'GET') {
+        ApiSupport::requireUser();
+        ApiSupport::out(200, ['success' => true, 'datos' => CompanyService::list($db)]);
+    }
+
+    if ($resource === 'empresas-publicas' && $method === 'GET') {
+        ApiSupport::out(200, ['success' => true, 'datos' => CompanyService::publicList($db)]);
+    }
+
+    if ($resource === 'actualizar-empresa' && $method === 'POST') {
+        ApiSupport::requireUser();
+        ApiSupport::out(200, ['success' => true, 'resultado' => CompanyService::update($db)]);
+    }
+
+    if ($resource === 'puntos-pago' && $method === 'GET') {
+        ApiSupport::requireUser();
+        ApiSupport::out(200, ['success' => true, 'datos' => CompanyService::paymentPoints($db)]);
+    }
+
+    if ($resource === 'dashboard' && $method === 'GET') {
+        $userId = ApiSupport::requireUser();
+        ApiSupport::out(200, ['success' => true, 'datos' => lib_dashboard($db, $userId)]);
+    }
+
+    if ($resource === 'empleados-pendientes' && $method === 'GET') {
+        ApiSupport::requireUser();
+        ApiSupport::out(200, ['success' => true, 'datos' => EmployeeService::pending($db)]);
+    }
+
+    if ($resource === 'asignar-rol-empleado' && $method === 'POST') {
+        ApiSupport::requireUser();
+        ApiSupport::out(200, ['success' => true, 'resultado' => EmployeeService::assignRole($db)]);
+    }
+
+    if (in_array($resource, ['mis-prestamos', 'mis-cuotas'], true) && $method === 'GET') {
+        $clientId = ApiSupport::requireUser();
+        if (!ApiSupport::role('Cliente')) ApiSupport::out(403, ['success' => false, 'message' => 'Solo el cliente puede consultar este resumen.']);
+        $datos = $resource === 'mis-prestamos' ? lib_my_loans($db, $clientId) : lib_my_installments($db, $clientId);
+        ApiSupport::out(200, ['success' => true, 'datos' => $datos]);
+    }
+
     if (in_array($resource, ['tipos-prestamo', 'metodos-pago', 'monedas'], true) && $method === 'GET') {
-        Lib::out(200, [
+        ApiSupport::out(200, [
             'success' => true,
-            'datos' => LoanController::catalogs($db, $resource),
+            'datos' => lib_catalogs($db, $resource),
         ]);
     }
 
     if ($resource === 'mi-perfil' && $method === 'GET') {
-        $clientId = Lib::requireUser();
+        $clientId = ApiSupport::requireUser();
         $query = $db->prepare(
             'SELECT Cliente_Sueldo sueldo, Cliente_Nombre nombre, Cliente_Apellido apellido
              FROM Cliente WHERE Cliente_ID = ?'
         );
         $query->execute([$clientId]);
-        Lib::out(200, ['success' => true] + ($query->fetch() ?: []));
+        ApiSupport::out(200, ['success' => true] + ($query->fetch() ?: []));
     }
 
     if ($resource === 'pago-cliente' && $method === 'POST') {
-        $clientId = Lib::requireUser();
-        if (Lib::admin()) {
-            Lib::out(403, ['success' => false, 'message' => 'Esta operación es para clientes.']);
-        }
+        ApiSupport::out(403, ['success' => false, 'message' => 'Los pagos se realizan personalmente en el punto de pago indicado.']);
+    }
 
-        $data = Lib::input();
-        $amount = filter_var($data['monto'] ?? null, FILTER_VALIDATE_FLOAT);
-        $methodId = (int)($data['metodoPagoId'] ?? 0);
-        if (!$amount || $amount <= 0 || !$methodId) {
-            throw new InvalidArgumentException('Indique un monto y método de pago válidos.');
-        }
-
-        $payment = Pago::registrar($db, [
-            $clientId,
-            $amount,
-            $methodId,
-            isset($data['prestamoId']) ? (int)$data['prestamoId'] : null,
-            isset($data['cuotaId']) ? (int)$data['cuotaId'] : null,
-            Lib::text($data, 'referencia', 100, false) ?: null,
-        ]);
-        Lib::out(201, [
-            'success' => true,
-            'resultado' => [
-                'pagoId' => $payment['Pago_ID'] ?? null,
-                'saldo' => $payment['Saldo'] ?? null,
-            ],
-            'message' => 'Pago registrado y aplicado.',
-        ]);
+    if ($resource === 'registrar-pago-presencial' && $method === 'POST') {
+        ApiSupport::requireUser();
+        ApiSupport::out(201, ['success' => true, 'resultado' => PaymentService::registerInPerson($db), 'message' => 'Pago presencial registrado por el personal autorizado.']);
     }
 
     if ($resource === 'solicitudes') {
-        Lib::out(200, [
+        ApiSupport::out(200, [
             'success' => true,
-            'datos' => LoanController::solicitudes($db, $method),
+            'datos' => lib_requests($db, $method),
         ]);
     }
 
-    Lib::requireUser();
-    if (!Lib::admin()) {
-        Lib::out(403, ['success' => false, 'message' => 'Esta operación requiere el rol administrativo.']);
+    ApiSupport::requireUser();
+    if (ApiSupport::readOnlyCompany() && $method !== 'GET') {
+        ApiSupport::out(403, ['success' => false, 'message' => 'Este perfil solo puede consultar resultados autorizados.']);
+    }
+    if (ApiSupport::role('Dueño') && !in_array($resource, ['identidad', 'dashboard'], true)) {
+        ApiSupport::out(403, ['success' => false, 'message' => 'El perfil dueño solo puede consultar su resumen empresarial.']);
+    }
+    if (ApiSupport::role('Gerente') && !in_array($resource, ['identidad', 'dashboard', 'clientes'], true)) {
+        ApiSupport::out(403, ['success' => false, 'message' => 'El perfil gerente solo puede consultar resultados empresariales autorizados.']);
+    }
+    if (!ApiSupport::staff() && !(ApiSupport::readOnlyCompany() && $method === 'GET')) {
+        ApiSupport::out(403, ['success' => false, 'message' => 'Esta operación requiere un rol de empleado autorizado.']);
     }
 
     if ($resource === 'resolver-solicitud' && $method === 'POST') {
         if (!$id) {
             throw new InvalidArgumentException('Indique la solicitud.');
         }
-        $data = Lib::input();
+        $data = ApiSupport::input();
         $result = Solicitud::resolver($db, [
             $id,
-            Lib::text($data, 'decision', 20),
+            ApiSupport::text($data, 'decision', 20),
             isset($data['tipoPrestamoId']) ? (int)$data['tipoPrestamoId'] : null,
             null,
-            Lib::text($data, 'garanteNombre', 150, false) ?: null,
-            Lib::text($data, 'garanteCedula', 30, false) ?: null,
-            Lib::text($data, 'garanteTelefono', 30, false) ?: null,
-            Lib::text($data, 'comentario', 500, false) ?: null,
+            ApiSupport::text($data, 'garanteNombre', 150, false) ?: null,
+            ApiSupport::text($data, 'garanteCedula', 30, false) ?: null,
+            ApiSupport::text($data, 'garanteTelefono', 30, false) ?: null,
+            ApiSupport::text($data, 'comentario', 500, false) ?: null,
         ]);
-        Lib::out(200, ['success' => true, 'resultado' => $result, 'message' => 'Solicitud resuelta.']);
+        ApiSupport::out(200, ['success' => true, 'resultado' => $result, 'message' => 'Solicitud resuelta.']);
     }
 
     if ($resource === 'registrar-desembolso' && $method === 'POST') {
-        $data = Lib::input();
+        $data = ApiSupport::input();
         $result = Prestamo::desembolsar($db, [
             (int)($data['prestamoId'] ?? 0),
             (int)($data['metodoPagoId'] ?? 0),
             (float)($data['monto'] ?? 0),
             $_SESSION['acceso_id'] ?? null,
-            Lib::text($data, 'referencia', 100, false) ?: null,
-            Lib::text($data, 'observacion', 500, false) ?: null,
+            ApiSupport::text($data, 'referencia', 100, false) ?: null,
+            ApiSupport::text($data, 'observacion', 500, false) ?: null,
         ]);
-        Lib::out(201, ['success' => true, 'resultado' => $result, 'message' => 'Desembolso registrado.']);
+        ApiSupport::out(201, ['success' => true, 'resultado' => $result, 'message' => 'Desembolso registrado.']);
     }
 
     if ($resource === 'revertir-pago' && $method === 'POST') {
-        $data = Lib::input();
+        $data = ApiSupport::input();
         Pago::revertir($db, [
             (int)($data['pagoId'] ?? 0),
-            Lib::text($data, 'motivo', 500),
+            ApiSupport::text($data, 'motivo', 500),
             $_SESSION['acceso_id'] ?? null,
-            Lib::text($data, 'referenciaExterna', 100, false) ?: null,
+            ApiSupport::text($data, 'referenciaExterna', 100, false) ?: null,
         ]);
-        Lib::out(200, ['success' => true, 'message' => 'Pago revertido dentro del sistema.']);
+        ApiSupport::out(200, ['success' => true, 'message' => 'Pago revertido dentro del sistema.']);
     }
 
     if ($resource === 'revertir-desembolso' && $method === 'POST') {
-        $data = Lib::input();
+        $data = ApiSupport::input();
         Prestamo::revertirDesembolso($db, [
             (int)($data['desembolsoId'] ?? 0),
-            Lib::text($data, 'motivo', 500),
+            ApiSupport::text($data, 'motivo', 500),
             $_SESSION['acceso_id'] ?? null,
-            Lib::text($data, 'referenciaExterna', 100, false) ?: null,
+            ApiSupport::text($data, 'referenciaExterna', 100, false) ?: null,
         ]);
-        Lib::out(200, ['success' => true, 'message' => 'Desembolso revertido dentro del sistema.']);
+        ApiSupport::out(200, ['success' => true, 'message' => 'Desembolso revertido dentro del sistema.']);
     }
 
-    Lib::out(200, ['success' => true] + EntityController::run($db, $resource, $method, $id));
+    ApiSupport::out(200, ['success' => true] + EntityService::run($db, $resource, $method, $id));
 } catch (InvalidArgumentException $error) {
-    Lib::out(400, ['success' => false, 'message' => $error->getMessage()]);
+    ApiSupport::out(400, ['success' => false, 'message' => $error->getMessage()]);
 } catch (PDOException $error) {
-    $message = Lib::databaseMessage($error);
+    $message = ApiSupport::databaseMessage($error);
     if ($message !== null) {
-        Lib::out(409, ['success' => false, 'message' => $message]);
+        ApiSupport::out(409, ['success' => false, 'message' => $message]);
     }
     error_log('NewTalentLoans SQL: ' . $error->getMessage());
-    Lib::out(500, ['success' => false, 'message' => 'No se pudo completar la operación en la base de datos.']);
+    ApiSupport::out(500, ['success' => false, 'message' => 'No se pudo completar la operación en la base de datos.']);
 } catch (Throwable $error) {
     error_log('NewTalentLoans: ' . $error->getMessage());
     $message = $error instanceof RuntimeException
         ? $error->getMessage()
         : 'Error al procesar la solicitud.';
-    Lib::out(500, ['success' => false, 'message' => $message]);
+    ApiSupport::out(500, ['success' => false, 'message' => $message]);
 }
+
+
+
+

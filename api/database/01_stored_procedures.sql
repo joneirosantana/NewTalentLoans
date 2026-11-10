@@ -1,6 +1,8 @@
 /* 01 - STORED PROCEDURES. Ejecutar después de los archivos 03 y 02. */
 USE NewTalentLoans;
 GO
+
+
 IF NOT EXISTS(
     SELECT 1
     FROM EstadoPrestamo
@@ -8,9 +10,13 @@ IF NOT EXISTS(
     INSERT EstadoPrestamo(EstadoPrestamo_Nombre)
     VALUES(N'Aprobado');
 GO
+
+
 SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_RegistrarCliente
 @Nombre NVARCHAR(100), @Apellido NVARCHAR(100), @Cedula NVARCHAR(30), @Sueldo DECIMAL(18, 2),
 @Calle NVARCHAR(150), @Numero NVARCHAR(20)=NULL, @Sector NVARCHAR(100)=NULL, @Referencia NVARCHAR(500)=NULL,
@@ -79,6 +85,8 @@ THROW;
 END CATCH
 END
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_CrearSolicitud
 @Cliente_ID INT, @TipoPrestamo_ID INT, @MetodoPago_ID INT, @Monto DECIMAL(18, 2), @Plazo INT, @Motivo NVARCHAR(500)=NULL, @Moneda_ID INT=NULL, @Acceso_ID INT=NULL
 AS
@@ -139,6 +147,9 @@ THROW;
 END CATCH
 END
 GO
+
+
+
 CREATE OR ALTER PROCEDURE sp_ResolverSolicitud
 @Solicitud_ID INT, @Decision NVARCHAR(20), @TipoPrestamo_ID INT=NULL, @Empleado_ID INT=NULL,
 @Garante_Nombre NVARCHAR(150)=NULL, @Garante_Cedula NVARCHAR(30)=NULL, @Garante_Telefono NVARCHAR(30)=NULL, @Comentario NVARCHAR(500)=NULL
@@ -233,6 +244,9 @@ THROW;
 END CATCH
 END
 GO
+
+
+
 CREATE OR ALTER PROCEDURE sp_RegistrarDesembolso
 @Prestamo_ID INT, @MetodoPago_ID INT, @Monto DECIMAL(18, 2), @Acceso_ID INT=NULL, @Referencia NVARCHAR(100)=NULL, @Observacion NVARCHAR(500)=NULL
 AS
@@ -290,6 +304,9 @@ THROW;
 END CATCH
 END
 GO
+
+
+
 CREATE OR ALTER PROCEDURE sp_RegistrarPago
 @Cliente_ID INT, @Monto DECIMAL(18, 2), @MetodoPago_ID INT, @Prestamo_ID INT=NULL, @Cuota_ID INT=NULL, @Referencia NVARCHAR(100)=NULL
 AS
@@ -341,6 +358,8 @@ THROW;
 END CATCH
 END
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_RevertirPago
 @Pago_ID INT, @Motivo NVARCHAR(500), @Acceso_ID INT=NULL, @ReferenciaExterna NVARCHAR(100)=NULL
 AS
@@ -379,6 +398,8 @@ THROW;
 END CATCH
 END
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_RevertirDesembolso
 @Desembolso_ID INT, @Motivo NVARCHAR(500), @Acceso_ID INT=NULL, @ReferenciaExterna NVARCHAR(100)=NULL
 AS

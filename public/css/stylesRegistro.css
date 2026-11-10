@@ -355,3 +355,4 @@ body {
     color: #00963f;
     font-size: 14px;
 }
+.top-notice{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:20;width:min(720px,calc(100% - 32px));padding:14px 44px 14px 18px;border-radius:12px;background:#102a43;color:#fff;box-shadow:0 10px 30px #102a4340;font-size:14px}.top-notice strong{display:block;margin-bottom:4px}.top-notice span{opacity:.9}.top-notice button{position:absolute;right:12px;top:10px;border:0;background:transparent;color:#fff;font-size:24px;cursor:pointer}

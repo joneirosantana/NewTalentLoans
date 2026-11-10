@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarMensaje('Datos incompletos', 'Escriba su correo y contraseña.');
             return;
         }
-        fetch('api/?recurso=sesion', {
+        NTLApi.fetch('http://api.newtalentloans.local/?recurso=sesion', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ correo: correo, contrasena: contrasena })
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 throw new Error(resultado.contenido.message || 'No se pudo iniciar sesión.');
             }
             localStorage.setItem('usuario', JSON.stringify(resultado.contenido.usuario));
-            var destino = resultado.contenido.usuario.esAdministrador ? 'panel-servicios.html' : 'solicitudes.html';
+            var destino = resultado.contenido.usuario.rol === 'Cliente' ? 'dashboard.html' : 'empleados.html';
             mostrarMensaje('Bienvenido', 'Inicio de sesión correcto.', function () {
                 window.location.href = destino;
             });

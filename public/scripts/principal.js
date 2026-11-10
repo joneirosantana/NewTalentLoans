@@ -1,5 +1,42 @@
 document.addEventListener('DOMContentLoaded', function() {
 
+    const formContacto = document.getElementById('formContacto');
+    const contactoAviso = document.getElementById('contactoAviso');
+    const modalContacto = document.getElementById('modalContacto');
+    const abrirContacto = document.getElementById('abrirContacto');
+    const abrirContactoFooter = document.getElementById('abrirContactoFooter');
+    const cerrarContacto = document.getElementById('cerrarContacto');
+    function mostrarContacto() { if (modalContacto) { modalContacto.hidden = false; document.getElementById('contactoNombre').focus(); } }
+    function ocultarContacto() { if (modalContacto) modalContacto.hidden = true; }
+    if (abrirContacto) abrirContacto.addEventListener('click', mostrarContacto);
+    if (abrirContactoFooter) abrirContactoFooter.addEventListener('click', mostrarContacto);
+    if (cerrarContacto) cerrarContacto.addEventListener('click', ocultarContacto);
+    if (modalContacto) modalContacto.addEventListener('click', function (event) { if (event.target === modalContacto) ocultarContacto(); });
+    document.addEventListener('keydown', function (event) { if (event.key === 'Escape') ocultarContacto(); });
+    if (formContacto) {
+        formContacto.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            contactoAviso.textContent = 'Enviando…';
+            try {
+                const response = await NTLApi.fetch('http://api.newtalentloans.local/?recurso=contacto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: document.getElementById('contactoNombre').value.trim(),
+                        correo: document.getElementById('contactoCorreo').value.trim(),
+                        mensaje: document.getElementById('contactoMensaje').value.trim()
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.message || 'No se pudo enviar el mensaje.');
+                contactoAviso.textContent = 'Mensaje enviado. Servicio al cliente se pondrá en contacto contigo.';
+                formContacto.reset();
+            } catch (error) {
+                contactoAviso.textContent = error.message;
+            }
+        });
+    }
+
     // =========================================
     // MENÚ MÓVIL
     // =========================================

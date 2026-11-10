@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================
     // 🔌 CONFIGURACIÓN DEL BACKEND
     // ==========================================================
-    const API_URL = 'http://localhost:3000';
+    const API_URL = 'http://api.newtalentloans.local';
 
     const ENDPOINTS = {
-        cambiar: `${API_URL}/api/usuarios/cambiar-password`
+        cambiar: `${API_URL}/?recurso=cambiar-contrasena`
     };
 
     // 👇 Cambia a FALSE cuando tengas tu backend listo
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = localStorage.getItem('token');
 
         try {
-            const response = await fetch(ENDPOINTS.cambiar, {
+            const response = await NTLApi.fetch(ENDPOINTS.cambiar, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
