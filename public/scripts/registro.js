@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', function () {
     var modalBoton = document.getElementById('modalBtn');
     var modalTerminos = document.getElementById('modalTerminos');
     var pasoActual = 0;
+    var empleadoNotice = document.getElementById('empleadoNotice');
+    NTLApi.fetch('http://api.newtalentloans.local/?recurso=empresas-publicas').then(function (r) { return r.json(); }).then(function (j) {
+        var select = document.getElementById('empresaId');
+        (j.datos || []).forEach(function (empresa) { var option = document.createElement('option'); option.value = empresa.Empresa_ID; option.textContent = empresa.Empresa_Nombre + ' — RNC ' + empresa.Empresa_RNC; select.appendChild(option); });
+    }).catch(function () {});
 
     function mostrarMensaje(titulo, mensaje, accion) {
         modalTitulo.textContent = titulo;
@@ -67,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function enviarRegistro(datos) {
         botonSiguiente.disabled = true;
         botonSiguiente.textContent = 'Enviando...';
-        fetch('api/?recurso=registro', {
+        NTLApi.fetch('http://api.newtalentloans.local/?recurso=registro', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(datos)
@@ -79,7 +84,14 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!resultado.ok || !resultado.contenido.success) {
                 throw new Error(resultado.contenido.message || 'No se pudo completar el registro.');
             }
-            mostrarMensaje('Registro exitoso', 'La cuenta fue creada. Ya puede iniciar sesión.', function () {
+            var usuario = resultado.contenido.usuario || {};
+            if (usuario.tipo === 'empleado' && empleadoNotice) {
+                empleadoNotice.hidden = false;
+                empleadoNotice.querySelector('button').onclick = function () { empleadoNotice.hidden = true; };
+            }
+            mostrarMensaje(usuario.tipo === 'empleado' ? 'Solicitud enviada a RRHH' : 'Registro exitoso', usuario.tipo === 'empleado'
+                ? 'Tu registro inició como empleado y quedó pendiente de revisión por RRHH.'
+                : 'La cuenta fue creada. Ya puede iniciar sesión.', function () {
                 window.location.href = 'iniciar-sesion.html';
             });
         }).catch(function (error) {
@@ -110,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function () {
             telefono: document.getElementById('telefono').value.trim(),
             cedula: document.getElementById('cedula').value.trim(),
             sueldo: document.getElementById('sueldo').value,
+            empresaId: document.getElementById('empresaId').value,
             correo: document.getElementById('correo').value.trim(),
             contrasena: document.getElementById('password').value
         };

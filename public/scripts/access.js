@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    var requested = document.body.dataset.access || 'user';
+        var requested = document.body.dataset.access || 'user';
 
     try {
-        var response = await fetch('api/?recurso=identidad', { credentials: 'same-origin' });
+        var response = await NTLApi.fetch('http://api.newtalentloans.local/?recurso=identidad', { credentials: 'same-origin' });
         var result = await response.json();
 
         if (!response.ok || !result.success) {
@@ -10,12 +10,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             return;
         }
 
-        var isAdmin = Boolean(result.usuario.esAdministrador);
-        if (requested === 'admin' && !isAdmin) {
-            window.location.replace('solicitudes.html');
-        } else if (requested === 'client' && isAdmin) {
-            window.location.replace('panel-servicios.html');
-        }
+        var role = result.usuario.rol || '';
+        var allowed = requested === 'user' || requested === 'staff' && role !== 'Cliente' || requested === role.toLowerCase();
+        if (!allowed) window.location.replace(role === 'Cliente' ? 'dashboard.html' : 'empleados.html');
     } catch (error) {
         window.location.replace('iniciar-sesion.html');
     }

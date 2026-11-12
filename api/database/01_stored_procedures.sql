@@ -1,16 +1,22 @@
 /* 01 - STORED PROCEDURES. Ejecutar después de los archivos 03 y 02. */
 USE NewTalentLoans;
 GO
+
+
 IF NOT EXISTS(
     SELECT 1
-    FROM EstadoPrestamo
+    FROM vw_CatalogoEstadoPrestamo
     WHERE EstadoPrestamo_Nombre=N'Aprobado')
     INSERT EstadoPrestamo(EstadoPrestamo_Nombre)
     VALUES(N'Aprobado');
 GO
+
+
 SET ANSI_NULLS ON;
 SET QUOTED_IDENTIFIER ON;
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_RegistrarCliente
 @Nombre NVARCHAR(100), @Apellido NVARCHAR(100), @Cedula NVARCHAR(30), @Sueldo DECIMAL(18, 2),
 @Calle NVARCHAR(150), @Numero NVARCHAR(20)=NULL, @Sector NVARCHAR(100)=NULL, @Referencia NVARCHAR(500)=NULL,
@@ -30,30 +36,12 @@ IF NOT EXISTS(
     THROW 50102, N'No existe el rol Cliente.', 1;
 BEGIN TRY
 BEGIN TRANSACTION;
-DECLARE @ProvinceId INT, @CityId INT, @AddressId INT, @AccessId INT, @ClientId INT, @RoleId INT;
+DECLARE @AddressId INT, @AccessId INT, @ClientId INT, @RoleId INT;
 SELECT @RoleId=Rol_ID
     FROM Rol
     WHERE Rol_Nombre=N'Cliente';
-SELECT @ProvinceId=Provincia_ID
-    FROM Provincia WITH(UPDLOCK, HOLDLOCK)
-    WHERE Provincia_Nombre=LTRIM(RTRIM(@Provincia));
-IF @ProvinceId IS NULL
-    BEGIN
-    INSERT Provincia(Provincia_Nombre)
-    VALUES(LTRIM(RTRIM(@Provincia)));
-SET @ProvinceId=CONVERT(INT, SCOPE_IDENTITY());
-END
-SELECT @CityId=Ciudad_ID
-    FROM Ciudad WITH(UPDLOCK, HOLDLOCK)
-    WHERE Provincia_ID=@ProvinceId AND Ciudad_Nombre=LTRIM(RTRIM(@Ciudad));
-IF @CityId IS NULL
-    BEGIN
-    INSERT Ciudad(Provincia_ID, Ciudad_Nombre)
-    VALUES(@ProvinceId, LTRIM(RTRIM(@Ciudad)));
-SET @CityId=CONVERT(INT, SCOPE_IDENTITY());
-END
-INSERT Direccion(Ciudad_ID, Direccion_Calle, Direccion_Numero, Direccion_Sector, Direccion_Descripcion)
-    VALUES(@CityId, LTRIM(RTRIM(@Calle)), NULLIF(LTRIM(RTRIM(@Numero)), N''), NULLIF(LTRIM(RTRIM(@Sector)), N''), NULLIF(LTRIM(RTRIM(@Referencia)), N''));
+INSERT Direccion(Direccion_Provincia, Direccion_Ciudad, Direccion_Calle, Direccion_Numero, Direccion_Sector, Direccion_Descripcion)
+    VALUES(LTRIM(RTRIM(@Provincia)), LTRIM(RTRIM(@Ciudad)), LTRIM(RTRIM(@Calle)), NULLIF(LTRIM(RTRIM(@Numero)), N''), NULLIF(LTRIM(RTRIM(@Sector)), N''), NULLIF(LTRIM(RTRIM(@Referencia)), N''));
 SET @AddressId=CONVERT(INT, SCOPE_IDENTITY());
 INSERT Acceso(Rol_ID, Acceso_Correo, Acceso_ContrasenaHash)
     VALUES(@RoleId, LOWER(LTRIM(RTRIM(@Correo))), @ContrasenaHash);
@@ -79,6 +67,8 @@ THROW;
 END CATCH
 END
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_CrearSolicitud
 @Cliente_ID INT, @TipoPrestamo_ID INT, @MetodoPago_ID INT, @Monto DECIMAL(18, 2), @Plazo INT, @Motivo NVARCHAR(500)=NULL, @Moneda_ID INT=NULL, @Acceso_ID INT=NULL
 AS
@@ -91,36 +81,36 @@ BEGIN TRY
 BEGIN TRANSACTION;
 IF NOT EXISTS(
     SELECT 1
-    FROM Cliente
+    FROM vw_ClientesDetalle
     WHERE Cliente_ID=@Cliente_ID)
     THROW 50111, N'Cliente no encontrado.', 1;
 IF @Acceso_ID IS NOT NULL AND NOT EXISTS(
     SELECT 1
-    FROM Cliente
+    FROM vw_ClientesDetalle
     WHERE Cliente_ID=@Cliente_ID AND Acceso_ID=@Acceso_ID)
     THROW 50116, N'La cuenta no corresponde al cliente.', 1;
 IF NOT EXISTS(
     SELECT 1
-    FROM TipoPrestamo
+    FROM vw_CatalogoTipoPrestamo
     WHERE TipoPrestamo_ID=@TipoPrestamo_ID)
     THROW 50112, N'Tipo de préstamo no encontrado.', 1;
 IF NOT EXISTS(
     SELECT 1
-    FROM MetodoPago
+    FROM vw_CatalogoMetodoPago
     WHERE MetodoPago_ID=@MetodoPago_ID)
     THROW 50113, N'Método de pago no encontrado.', 1;
 IF @Moneda_ID IS NULL
     SELECT @Moneda_ID=Moneda_ID
-    FROM Moneda
+    FROM vw_CatalogoMoneda
     WHERE Moneda_Codigo='DOP' AND Moneda_Activa=1;
 IF @Moneda_ID IS NULL OR NOT EXISTS(
     SELECT 1
-    FROM Moneda
+    FROM vw_CatalogoMoneda
     WHERE Moneda_ID=@Moneda_ID AND Moneda_Activa=1)
     THROW 50114, N'Moneda inválida o inactiva.', 1;
 DECLARE @StateId INT, @NewId INT;
 SELECT @StateId=EstadoSolicitud_ID
-    FROM EstadoSolicitud
+    FROM vw_CatalogoEstadoSolicitud
     WHERE EstadoSolicitud_Nombre=N'Pendiente';
 IF @StateId IS NULL
     THROW 50115, N'Falta el estado Pendiente.', 1;
@@ -139,6 +129,9 @@ THROW;
 END CATCH
 END
 GO
+
+
+
 CREATE OR ALTER PROCEDURE sp_ResolverSolicitud
 @Solicitud_ID INT, @Decision NVARCHAR(20), @TipoPrestamo_ID INT=NULL, @Empleado_ID INT=NULL,
 @Garante_Nombre NVARCHAR(150)=NULL, @Garante_Cedula NVARCHAR(30)=NULL, @Garante_Telefono NVARCHAR(30)=NULL, @Comentario NVARCHAR(500)=NULL
@@ -151,19 +144,19 @@ IF @Solicitud_ID IS NULL OR @Decision IS NULL OR @Decision NOT IN(N'Aprobada', N
 BEGIN TRY
 BEGIN TRANSACTION;
 DECLARE @ClientId INT, @Amount DECIMAL(18, 2), @Term INT, @CurrentStatus INT, @Pending INT, @Resolved INT, @TypeId INT, @Rate DECIMAL(5, 2), @Salary DECIMAL(18, 2), @LoanStatus INT, @LoanId INT=NULL, @Payment DECIMAL(18, 2), @MonthlyRate DECIMAL(18, 10), @Balance DECIMAL(18, 2), @Interest DECIMAL(18, 2), @Capital DECIMAL(18, 2), @n INT=1;
-SELECT @ClientId=s.Cliente_ID, @Amount=s.Solicitud_Monto, @Term=s.Solicitud_Plazo, @CurrentStatus=s.EstadoSolicitud_ID, @TypeId=COALESCE(@TipoPrestamo_ID, s.TipoPrestamo_ID), @Salary=c.Cliente_Sueldo
-FROM Solicitud s WITH(UPDLOCK, HOLDLOCK)
-    JOIN Cliente c ON c.Cliente_ID=s.Cliente_ID
+SELECT @ClientId=s.Cliente_ID, @Amount=s.Solicitud_Monto, @Term=s.Solicitud_Plazo, @CurrentStatus=s.EstadoSolicitud_ID, @TypeId=COALESCE(@TipoPrestamo_ID, s.TipoPrestamo_ID), @Salary=s.Cliente_Sueldo
+FROM vw_SolicitudesDetalle s
+    JOIN Solicitud raw WITH(UPDLOCK, HOLDLOCK) ON raw.Solicitud_ID=s.Solicitud_ID
     WHERE s.Solicitud_ID=@Solicitud_ID;
 IF @ClientId IS NULL
     THROW 50121, N'Solicitud no encontrada.', 1;
 SELECT @Pending=EstadoSolicitud_ID
-    FROM EstadoSolicitud
+    FROM vw_CatalogoEstadoSolicitud
     WHERE EstadoSolicitud_Nombre=N'Pendiente';
 IF @CurrentStatus<>@Pending
     THROW 50122, N'Solo se pueden resolver solicitudes pendientes.', 1;
 SELECT @Resolved=EstadoSolicitud_ID
-    FROM EstadoSolicitud
+    FROM vw_CatalogoEstadoSolicitud
     WHERE EstadoSolicitud_Nombre=@Decision;
 IF @Resolved IS NULL
     THROW 50123, N'No existe el estado solicitado.', 1;
@@ -172,13 +165,13 @@ BEGIN
 IF @TypeId IS NULL
     THROW 50124, N'Seleccione el tipo de préstamo.', 1;
 SELECT @Rate=TipoPrestamo_TasaBase
-    FROM TipoPrestamo
+    FROM vw_CatalogoTipoPrestamo
     WHERE TipoPrestamo_ID=@TypeId;
 IF @Rate IS NULL
     THROW 50125, N'Tipo de préstamo no encontrado.', 1;
 IF @Amount>(
     SELECT Cliente_Sueldo
-    FROM Cliente
+    FROM vw_ClientesDetalle
     WHERE Cliente_ID=@ClientId) AND (NULLIF(LTRIM(RTRIM(@Garante_Nombre)), N'') IS NULL OR NULLIF(LTRIM(RTRIM(@Garante_Cedula)), N'') IS NULL OR NULLIF(LTRIM(RTRIM(@Garante_Telefono)), N'') IS NULL)
     THROW 50126, N'El monto requiere los datos completos del garante.', 1;
 IF EXISTS(
@@ -233,6 +226,9 @@ THROW;
 END CATCH
 END
 GO
+
+
+
 CREATE OR ALTER PROCEDURE sp_RegistrarDesembolso
 @Prestamo_ID INT, @MetodoPago_ID INT, @Monto DECIMAL(18, 2), @Acceso_ID INT=NULL, @Referencia NVARCHAR(100)=NULL, @Observacion NVARCHAR(500)=NULL
 AS
@@ -290,6 +286,9 @@ THROW;
 END CATCH
 END
 GO
+
+
+
 CREATE OR ALTER PROCEDURE sp_RegistrarPago
 @Cliente_ID INT, @Monto DECIMAL(18, 2), @MetodoPago_ID INT, @Prestamo_ID INT=NULL, @Cuota_ID INT=NULL, @Referencia NVARCHAR(100)=NULL
 AS
@@ -303,19 +302,18 @@ BEGIN TRANSACTION;
 DECLARE @LoanId INT, @LoanBalance DECIMAL(18, 2), @PaymentId INT;
 IF NOT EXISTS(
     SELECT 1
-    FROM Cliente
+    FROM vw_ClientesDetalle
     WHERE Cliente_ID=@Cliente_ID)
     THROW 50131, N'Cliente no encontrado.', 1;
 IF NOT EXISTS(
     SELECT 1
-    FROM MetodoPago
+    FROM vw_CatalogoMetodoPago
     WHERE MetodoPago_ID=@MetodoPago_ID)
     THROW 50132, N'Método de pago no encontrado.', 1;
 SELECT TOP(1) @LoanId=p.Prestamo_ID, @LoanBalance=p.Prestamo_Saldo
     FROM Prestamo p WITH(UPDLOCK, HOLDLOCK)
-    JOIN Solicitud s ON s.Solicitud_ID=p.Solicitud_ID
-    JOIN EstadoPrestamo e ON e.EstadoPrestamo_ID=p.EstadoPrestamo_ID
-    WHERE s.Cliente_ID=@Cliente_ID AND (@Prestamo_ID IS NULL OR p.Prestamo_ID=@Prestamo_ID) AND e.EstadoPrestamo_Nombre=N'Activo' ORDER BY p.Prestamo_ID DESC;
+    JOIN vw_SolicitudesDetalle s ON s.Solicitud_ID=p.Solicitud_ID
+    WHERE s.Cliente_ID=@Cliente_ID AND (@Prestamo_ID IS NULL OR p.Prestamo_ID=@Prestamo_ID) AND EXISTS (SELECT 1 FROM vw_PrestamosResumen r WHERE r.Prestamo_ID=p.Prestamo_ID AND r.EstadoPrestamo_Nombre=N'Activo') ORDER BY p.Prestamo_ID DESC;
 IF @LoanId IS NULL
     THROW 50133, N'No existe un préstamo activo para el cliente.', 1;
 IF @Monto>@LoanBalance
@@ -341,6 +339,8 @@ THROW;
 END CATCH
 END
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_RevertirPago
 @Pago_ID INT, @Motivo NVARCHAR(500), @Acceso_ID INT=NULL, @ReferenciaExterna NVARCHAR(100)=NULL
 AS
@@ -379,6 +379,8 @@ THROW;
 END CATCH
 END
 GO
+
+
 CREATE OR ALTER PROCEDURE sp_RevertirDesembolso
 @Desembolso_ID INT, @Motivo NVARCHAR(500), @Acceso_ID INT=NULL, @ReferenciaExterna NVARCHAR(100)=NULL
 AS

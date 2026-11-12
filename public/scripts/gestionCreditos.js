@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function () {
         'pagos': { id: 'Pago_ID', campos: ['Pago_PrestamoId', 'Pago_MetodoPagoId', 'Pago_Fecha', 'Pago_Monto', 'Pago_UsuarioId'] },
         'metodos-pago': { id: 'MetodoPago_ID', campos: ['MetodoPago_Nombre', 'MetodoPago_Descripcion'] },
         'garantes': { id: 'Garante_ID', campos: ['Garante_PrestamoId', 'Garante_Nombre', 'Garante_Cedula', 'Garante_Telefono'] },
-        'facturacion': { id: 'Facturacion_ID', campos: ['Facturacion_MetodoPagoId', 'Facturacion_Fecha', 'Facturacion_Monto', 'Facturacion_Descripcion', 'Facturacion_Estado'] }
     };
     var selector = document.getElementById('recurso');
     var formulario = document.getElementById('formularioRegistro');
@@ -29,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.getElementById('cerrarSesion').addEventListener('click', function (evento) {
         evento.preventDefault();
-        fetch('api/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
+        NTLApi.fetch('http://api.newtalentloans.local/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
         localStorage.removeItem('usuario');
         window.location.href = 'index.html';
     });
@@ -37,7 +36,7 @@ document.addEventListener('DOMContentLoaded', function () {
     function definicionActual() { return definiciones[selector.value]; }
 
     async function pedir(url, opciones) {
-        var respuesta = await fetch(url, opciones || {});
+        var respuesta = await NTLApi.fetch(url, opciones || {});
         var contenido = await respuesta.json();
         if (!respuesta.ok || !contenido.success) throw new Error(contenido.message || 'No se pudo completar la operación.');
         return contenido;
@@ -154,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function cargarTiposPrestamo() {
-        var respuesta = await pedir('api/?recurso=tipos-prestamo');
+        var respuesta = await pedir('http://api.newtalentloans.local/?recurso=tipos-prestamo');
         tiposPrestamo = respuesta.datos || [];
     }
 
@@ -162,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function () {
         estado.textContent = 'Cargando registros...';
         try {
             if (selector.value === 'solicitudes') await cargarTiposPrestamo();
-            var respuesta = await pedir('api/?recurso=' + encodeURIComponent(selector.value));
+            var respuesta = await pedir('http://api.newtalentloans.local/?recurso=' + encodeURIComponent(selector.value));
             estado.textContent = '';
             dibujarTabla(respuesta.datos || []);
         } catch (error) {
@@ -179,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (decision === 'Rechazada' && !window.confirm('¿Confirmas que deseas rechazar esta solicitud?')) return;
         try {
             estado.textContent = 'Guardando decisión...';
-            var resultado = await pedir('api/?recurso=resolver-solicitud&id=' + encodeURIComponent(id), {
+            var resultado = await pedir('http://api.newtalentloans.local/?recurso=resolver-solicitud&id=' + encodeURIComponent(id), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ decision: decision, tipoPrestamoId: tipoPrestamoId })
@@ -194,7 +193,7 @@ document.addEventListener('DOMContentLoaded', function () {
     async function eliminarRegistro(id) {
         if (!window.confirm('¿Deseas eliminar el registro #' + id + '?')) return;
         try {
-            var respuesta = await pedir('api/?recurso=' + encodeURIComponent(selector.value) + '&id=' + encodeURIComponent(id), { method: 'DELETE' });
+            var respuesta = await pedir('http://api.newtalentloans.local/?recurso=' + encodeURIComponent(selector.value) + '&id=' + encodeURIComponent(id), { method: 'DELETE' });
             estado.textContent = respuesta.message;
             dibujarFormulario(null);
             await cargarRegistros();
@@ -210,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var datos = {};
         definicion.campos.forEach(function (campo) { datos[campo] = document.getElementById('campo_' + campo).value; });
         var metodo = registroActual ? 'PUT' : 'POST';
-        var url = 'api/?recurso=' + encodeURIComponent(selector.value);
+        var url = 'http://api.newtalentloans.local/?recurso=' + encodeURIComponent(selector.value);
         if (registroActual) url += '&id=' + encodeURIComponent(registroActual);
         try {
             estado.textContent = 'Guardando...';

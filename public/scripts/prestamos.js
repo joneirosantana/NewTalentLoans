@@ -7,15 +7,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ==========================================================
     // 🔌 CONFIGURACIÓN DEL BACKEND
     // ==========================================================
-    const API_URL = 'http://localhost:3000';
+    const API_URL = 'http://api.newtalentloans.local';
 
     const ENDPOINTS = {
-        listar:     `${API_URL}/api/prestamos`,
-        obtener:    (id) => `${API_URL}/api/prestamos/${id}`,
-        crear:      `${API_URL}/api/prestamos`,
-        actualizar: (id) => `${API_URL}/api/prestamos/${id}`,
-        eliminar:   (id) => `${API_URL}/api/prestamos/${id}`,
-        clientes:   `${API_URL}/api/clientes`
+        listar:     `${API_URL}/?recurso=prestamos`,
+        obtener:    (id) => `${API_URL}/?recurso=prestamos&id=${id}`,
+        crear:      `${API_URL}/?recurso=prestamos`,
+        actualizar: (id) => `${API_URL}/?recurso=prestamos&id=${id}`,
+        eliminar:   (id) => `${API_URL}/?recurso=prestamos&id=${id}`,
+        clientes:   `${API_URL}/?recurso=clientes`
     };
 
     // 👇 Cambia a FALSE cuando tengas tu backend listo
@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 '¿Estás seguro de que deseas cerrar sesión?',
                 () => {
                     localStorage.removeItem('token');
-                    fetch('api/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
+                    NTLApi.fetch('http://api.newtalentloans.local/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
                     localStorage.removeItem('usuario');
                     console.log('👋 Sesión cerrada correctamente');
                     window.location.href = 'sesion-cerrada.html';
@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================
     async function peticionAPI(url, opciones = {}) {
         try {
-            const response = await fetch(url, opciones);
+            const response = await NTLApi.fetch(url, opciones);
             const data = await response.json();
             return { ok: response.ok, status: response.status, data };
         } catch (error) {

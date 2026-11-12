@@ -13,7 +13,7 @@ IF EXISTS(
     FROM inserted
     WHERE Pago_Estado<>N'Aplicado')
     THROW 50017, N'Un pago nuevo siempre debe iniciar en estado Aplicado.', 1;
-DECLARE @pid INT, @loan INT, @method INT, @client INT, @target INT, @amount DECIMAL(18, 2), @balance DECIMAL(18, 2), @loanState NVARCHAR(40), @owner INT, @remain DECIMAL(18, 2), @installment INT, @part DECIMAL(18, 2), @first BIT, @today DATE=CONVERT(date, SYSDATETIME());
+DECLARE @pid INT, @loan INT, @method INT, @client INT, @target INT, @amount DECIMAL(18, 2), @balance DECIMAL(18, 2), @loanState NVARCHAR(40), @owner INT, @remain DECIMAL(18, 2), @installment INT, @part DECIMAL(18, 2), @first BIT;
 DECLARE c CURSOR LOCAL FAST_FORWARD FOR
     SELECT Pago_ID, Prestamo_ID, MetodoPago_ID, Cliente_ID, Cuota_ID, Pago_Monto
     FROM inserted ORDER BY Pago_ID;
@@ -52,7 +52,7 @@ WHILE @remain>0
 BEGIN
 SET @installment=NULL;
 SET @part=NULL;
-IF @first AND @target IS NOT NULL
+IF @first=1 AND @target IS NOT NULL
 SELECT @installment=Cuota_ID, @part=Cuota_Saldo
     FROM Cuota WITH(UPDLOCK)
     WHERE Cuota_ID=@target AND Prestamo_ID=@loan AND Cuota_Saldo>0;
@@ -86,13 +86,8 @@ EstadoPrestamo_ID=CASE WHEN Prestamo_Saldo-@amount=0 THEN COALESCE((
     END), EstadoPrestamo_ID) ELSE EstadoPrestamo_ID
     END
 WHERE Prestamo_ID=@loan;
-DECLARE @receiptType INT=(
-    SELECT TOP(1) TipoFactura_ID
-    FROM TipoFactura
-    WHERE TipoFactura_Nombre=N'Recibo de pago');
-IF @receiptType IS NOT NULL
-    INSERT Factura(TipoFactura_ID, MetodoPago_ID, Factura_Monto, Factura_Descripcion, Factura_Estado, Pago_ID)
-    VALUES(@receiptType, @method, @amount, CONCAT(N'Pago del préstamo #', @loan), N'Emitida', @pid);
+/* Los pagos se reciben presencialmente. La aplicación registra la confirmación interna,
+   pero no emite recibos, facturas ni comprobantes al cliente. */
 INSERT Auditoria(Acceso_ID, Auditoria_Entidad, Auditoria_RegistroId, Auditoria_Accion, Auditoria_Detalle, Auditoria_DireccionIP)
 SELECT a.Acceso_ID, N'Pago', CONVERT(nvarchar(100), @pid), N'INSERT', CONCAT(N'Pago aplicado: ', @amount, N' al préstamo #', @loan), NULL
     FROM Cliente cl
@@ -150,9 +145,6 @@ FROM Cuota q
     SELECT Cuota_ID, SUM(PagoCuota_Monto) Monto
     FROM PagoCuota
     WHERE Pago_ID=@pid GROUP BY Cuota_ID) x ON x.Cuota_ID=q.Cuota_ID;
-UPDATE Factura
-    SET Factura_Estado=N'Anulada'
-    WHERE Pago_ID=@pid;
 UPDATE Prestamo
     SET Prestamo_Saldo=CASE WHEN EXISTS(
     SELECT 1
@@ -165,7 +157,7 @@ UPDATE Prestamo
 EstadoPrestamo_ID=CASE WHEN e.EstadoPrestamo_Nombre IN(N'Pagado', N'Finalizado') THEN COALESCE((
     SELECT TOP(1) EstadoPrestamo_ID
     FROM EstadoPrestamo
-    WHERE EstadoPrestamo_Nombre=N'Activo'), EstadoPrestamo_ID) ELSE EstadoPrestamo_ID
+    WHERE EstadoPrestamo_Nombre=N'Activo'), p.EstadoPrestamo_ID) ELSE p.EstadoPrestamo_ID
     END
 FROM Prestamo p
     JOIN EstadoPrestamo e ON e.EstadoPrestamo_ID=p.EstadoPrestamo_ID
@@ -261,20 +253,6 @@ IF EXISTS(
     JOIN EstadoSolicitud e ON e.EstadoSolicitud_ID=d.EstadoSolicitud_ID
     WHERE e.EstadoSolicitud_Nombre IN(N'Aprobada', N'Rechazada') AND (i.Cliente_ID<>d.Cliente_ID OR i.Solicitud_Monto<>d.Solicitud_Monto OR i.Solicitud_Plazo<>d.Solicitud_Plazo OR ISNULL(i.TipoPrestamo_ID, 0)<>ISNULL(d.TipoPrestamo_ID, 0)))
     THROW 50031, N'Una solicitud evaluada no puede cambiar de cliente, monto, plazo o tipo.', 1;
-IF EXISTS(
-    SELECT 1
-    FROM inserted i
-    JOIN deleted d ON d.Solicitud_ID=i.Solicitud_ID
-    JOIN TipoPrestamo t ON t.TipoPrestamo_ID=i.TipoPrestamo_ID
-    WHERE (i.Solicitud_Monto<>d.Solicitud_Monto OR ISNULL(i.TipoPrestamo_ID, 0)<>ISNULL(d.TipoPrestamo_ID, 0)) AND (i.Solicitud_Monto<t.TipoPrestamo_MontoMinimo OR i.Solicitud_Monto>t.TipoPrestamo_MontoMaximo))
-    THROW 50032, N'Monto fuera del rango permitido para el tipo de préstamo.', 1;
-IF EXISTS(
-    SELECT 1
-    FROM inserted i
-    JOIN deleted d ON d.Solicitud_ID=i.Solicitud_ID
-    JOIN TipoPrestamo t ON t.TipoPrestamo_ID=i.TipoPrestamo_ID
-    WHERE (i.Solicitud_Plazo<>d.Solicitud_Plazo OR ISNULL(i.TipoPrestamo_ID, 0)<>ISNULL(d.TipoPrestamo_ID, 0)) AND (i.Solicitud_Plazo<t.TipoPrestamo_PlazoMinimo OR i.Solicitud_Plazo>t.TipoPrestamo_PlazoMaximo))
-    THROW 50033, N'Plazo fuera del rango permitido para el tipo de préstamo.', 1;
 END
 GO
 CREATE OR ALTER TRIGGER TR_Prestamo_AfterUpdate ON Prestamo AFTER
@@ -303,18 +281,6 @@ CREATE OR ALTER TRIGGER TR_Acceso_AfterUpdate ON Acceso AFTER
     UPDATE AS
 BEGIN
 SET NOCOUNT ON;
-IF (
-    UPDATE(Acceso_Activo) OR
-    UPDATE(Rol_ID)) AND EXISTS(
-    SELECT 1
-    FROM deleted d
-    JOIN Rol r ON r.Rol_ID=d.Rol_ID
-    WHERE r.Rol_Nombre=N'Administrador' AND d.Acceso_Activo=1) AND NOT EXISTS(
-    SELECT 1
-    FROM Acceso a
-    JOIN Rol r ON r.Rol_ID=a.Rol_ID
-    WHERE r.Rol_Nombre=N'Administrador' AND a.Acceso_Activo=1)
-    THROW 50035, N'No se puede desactivar al último administrador activo.', 1;
 INSERT Auditoria(Acceso_ID, Auditoria_Entidad, Auditoria_RegistroId, Auditoria_Accion, Auditoria_Detalle)
 SELECT i.Acceso_ID, N'Acceso', CONVERT(nvarchar(100), i.Acceso_ID), N'UPDATE', CONCAT(N'Cuenta modificada; activo: ', i.Acceso_Activo, N'; rol: ', r.Rol_Nombre, N'; correo: ', i.Acceso_Correo, CASE WHEN i.Acceso_ContrasenaHash<>d.Acceso_ContrasenaHash THEN N'; contraseña actualizada' ELSE N''
     END)

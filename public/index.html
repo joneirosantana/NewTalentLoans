@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>New Talent Loans | Tu Aliado Financiero</title>
-    <link rel="icon" type="image/x-icon" href="api/media.php?asset=icon">
+    <link rel="icon" type="image/x-icon" href="http://api.newtalentloans.local/media.php?asset=icon">
     
     <!-- Fuente Montserrat -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -14,6 +14,7 @@
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
     <link rel="stylesheet" href="css/principal.css">
+    <script src="scripts/api-client.js"></script>
 </head>
 <body>
 
@@ -24,7 +25,7 @@
         <div class="header-container">
             
             <a href="index.html" class="logo">
-                <img src="api/media.php?asset=logo" alt="New Talent Loans">
+                <img src="http://api.newtalentloans.local/media.php?asset=logo" alt="New Talent Loans">
             </a>
 
             <nav class="nav-menu" id="navMenu">
@@ -455,7 +456,7 @@
         <div class="footer-container">
             
             <div class="footer-column">
-                <img src="api/media.php?asset=logo" alt="New Talent Loans" class="footer-logo">
+                <img src="http://api.newtalentloans.local/media.php?asset=logo" alt="New Talent Loans" class="footer-logo">
                 <p>Tu aliado financiero de confianza. Préstamos rápidos, seguros y sin complicaciones.</p>
                 <div class="footer-social">
                     <a href="#"><ion-icon name="logo-facebook"></ion-icon></a>
@@ -492,6 +493,7 @@
                     <li><ion-icon name="call-outline"></ion-icon> +57 300 123 4567</li>
                     <li><ion-icon name="mail-outline"></ion-icon> info@newtalentloans.com</li>
                 </ul>
+                <button id="abrirContactoFooter" type="button" class="contact-link">Haz clic aquí para contactarnos</button>
             </div>
 
         </div>
@@ -528,6 +530,22 @@
             </div>
         </div>
     </footer>
+
+    <button id="abrirContacto" class="contacto-flotante" type="button" aria-haspopup="dialog" aria-controls="modalContacto">Contáctanos</button>
+    <div id="modalContacto" class="modal-contacto" role="dialog" aria-modal="true" aria-labelledby="tituloContacto" hidden>
+        <div class="modal-contacto-contenido">
+            <button id="cerrarContacto" class="modal-contacto-cerrar" type="button" aria-label="Cerrar ventana de contacto">×</button>
+            <h2 id="tituloContacto">Contáctanos</h2>
+            <p>Déjanos tu mensaje y servicio al cliente se comunicará contigo.</p>
+            <form id="formContacto" class="contact-form">
+                <input id="contactoNombre" type="text" placeholder="Nombre" maxlength="120" required>
+                <input id="contactoCorreo" type="email" placeholder="Tu correo" maxlength="254" required>
+                <textarea id="contactoMensaje" placeholder="¿En qué podemos ayudarte?" maxlength="1000" required></textarea>
+                <button type="submit">Enviar mensaje</button>
+                <small id="contactoAviso" role="status"></small>
+            </form>
+        </div>
+    </div>
 
         <!-- ============================================
          MODAL DE TÉRMINOS Y CONDICIONES

@@ -1,15 +1,21 @@
-# NewTalentLoans
+# NewTalentLoans 2.0
 
-El proyecto queda separado en `public/` (solo HTML, CSS y JavaScript) y `api/` (PHP, router, controladores, modelos en `entity/`, configuración, SQL y archivos internos). Los logotipos se entregan desde un endpoint de `api/`; no hay PHP ni imágenes sueltas en `public/`. El router recibe `api/?recurso=...` y la configuración privada está en `api/.config.php`.
+El proyecto separa la GUI en `public/` y la API en `api/`. En local la GUI se sirve en `http://newtalentloans.local` y consume `http://api.newtalentloans.local/?recurso=...`. La configuración privada está en `api/.config.php`.
+
+La versión 2.0 incorpora dashboard de cliente con solicitudes, préstamos, cuotas, deuda, interés y mora; dashboard interno por rol; y roles de empleado para RRHH, Contabilidad, Solicitudes y Gerencia. La tabla `Direccion` integra Provincia, Ciudad y los datos de calle/sector.
+
+El registro clasifica automáticamente como empleado cualquier correo cuyo dominio termine en `@newtalentloans.com`; esas cuentas quedan pendientes y desactivadas hasta la revisión de RRHH. Todos los demás dominios se registran como clientes.
+
+Para Apache, copie `apache-vhosts.conf` al archivo de VirtualHosts, habilite `mod_rewrite` y agregue al archivo hosts: `127.0.0.1 newtalentloans.local api.newtalentloans.local`.
 
 ## Puesta en marcha
 
 1. Configure `server`, `database`, `username` y `password` en `api/.config.php`, o use `NTL_DB_SERVER`, `NTL_DB_NAME`, `NTL_DB_USER` y `NTL_DB_PASSWORD`.
 2. Active PDO_SQLSRV en PHP y habilite `mod_rewrite` y `.htaccess` en Apache. Sirva la carpeta por HTTP.
-3. En la primera solicitud a la API, si la base no existe, el sistema la crea e instala el esquema completo, los triggers, los procedimientos, roles, catálogos y registros ficticios. La API no ejecuta migraciones ni elimina o modifica bases existentes. El usuario SQL necesita permisos `CREATE DATABASE`, `CREATE TABLE`, `CREATE TRIGGER` y `CREATE PROCEDURE`.
+3. En la primera solicitud a la API, si la base no existe o está vacía, el sistema instala el esquema completo, `vistas.sql`, los triggers, los procedimientos, roles, catálogos y registros ficticios. La cuenta administrativa se valida exclusivamente en `api/admin.php`; no se crea en `Rol`, `Acceso` ni `Empleado`.
 4. Cambie las claves de prueba antes de compartir el entorno. Para producción use variables de entorno y un usuario SQL de permisos limitados.
 
-Credenciales locales configurables: administrador `admin@newtalentloans.local` / `Demo1234!`; cliente de prueba `cliente@newtalentloans.local` / `Cliente123!`; empleado de prueba `empleado@newtalentloans.local` / `Empleado123!`. Se pueden sustituir por variables `NTL_ADMIN_*`, `NTL_DEMO_CLIENT_*` y `NTL_DEMO_EMPLOYEE_*`.
+Credenciales locales: administrador `admin@newtalentloans.local` / `Demo1234!`, definidas en `api/admin.php`; cliente de prueba `cliente@newtalentloans.local` / `Cliente123!`. No se crea un empleado demo.
 
 ## Flujos conectados
 
@@ -34,3 +40,31 @@ Las pantallas para registrar desembolsos, capturar datos de garante al aprobar y
 ## Pantallas que requieren trabajo manual
 
 La interfaz antigua incluía pantallas de reportes, panel, pagos, configuración y gestión avanzada basadas en un API distinto. Hay que completarles su front conectado al nuevo router para: aprobar/rechazar solicitudes y generar préstamo/cuotas; registrar pagos y aplicar saldo; procesar desembolsos; administrar documentos de solicitud, garantías y garantes; consultar auditoría y generar reportes. El esquema no guarda garante en una solicitud, así que sus datos deben solicitarse tras aprobar el préstamo. También falta una pantalla de administración de catálogos y usuarios/empleados. El CRUD de API es una base para esas pantallas, no sustituye esos flujos.
+
+## Entidades y acceso de datos
+
+El CRUD usa `TableEntity` para tablas configuradas por el controlador, `CatalogEntity` para listas compartidas y `LocationEntity` para provincia, ciudad y dirección. `Cliente`, `Solicitud`, `Prestamo` y `Pago` conservan clases específicas porque tienen reglas y procedimientos de negocio propios. `EntityInterface` define las operaciones comunes (`getAll`, `getById`, `insert`, `update`, `delete`) y `DatabaseManager` arma las consultas parametrizadas con tabla y campos permitidos.
+
+Cuando se usa `TableEntity` para insertar solicitud, préstamo, pago, desembolso, factura o garantía, se pueden pasar nombres o códigos configurados de catálogos en vez de IDs. Busca la opción y reutiliza su ID; si no existe, la crea con los datos requeridos dentro de la misma transacción. Los flujos actuales protegidos continúan usando sus procedimientos almacenados. `LocationEntity::createAddress` aplica el mismo patrón a provincia, ciudad y dirección. El registro de clientes existente resuelve esa ubicación desde `sp_RegistrarCliente`.
+
+## Esquema de base de datos
+
+El esquema de instalación y desarrollo se mantiene en `api/database/03_creacion_base_datos.sql`; los procedimientos y triggers permanecen en sus archivos SQL separados. Los cambios del esquema durante este desarrollo se editan ahí. No se agregó un sistema de migraciones ni historial de versiones.
+
+
+## Organización por capas
+
+- `public/`: GUI (HTML, CSS y JavaScript).
+- `api/index.php`: entrada HTTP del backend; conserva las rutas que usa la GUI.
+- `api/BLL/Services/`: servicios de autenticación, préstamos y operaciones CRUD con reglas de negocio.
+- `api/DAL/`: conexión, instalación inicial, consultas parametrizadas y entidades agrupadas.
+- `api/database/`: definición SQL, procedimientos y triggers.
+- `api/ApiSupport.php`: utilidades de transporte HTTP, sesión y validación de entrada.
+
+La GUI permanece en `public/`. El trabajo de interfaz puede avanzar después sin mover las reglas del BLL ni el acceso del DAL.
+
+## Dominios y driver de datos
+
+La GUI se publica en `http://newtalentloans.local` y consume `http://api.newtalentloans.local`. El API usa CORS con credenciales para esos orígenes y localhost de desarrollo. El VirtualHost del API apunta a `api/` y el principal a la raíz del proyecto.
+
+El driver DAL es `DatabaseConnection`: mantiene una conexión PDO compartida, usa `pdo_sqlsrv` para SQL Server, carga sus parámetros desde `api/.config.php` y ejecuta la instalación inicial solo cuando la base no existe. `DatabaseManager` concentra las consultas parametrizadas CRUD. La lógica del driver Singleton del proyecto de referencia se adaptó a PDO y se conservaron consultas preparadas para no concatenar valores SQL.

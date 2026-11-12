@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // =========================================
     // 0. CONFIGURACIÓN
     // =========================================
-    const API_URL = 'http://localhost:3000'; // 👈 CAMBIA ESTO POR LA URL DE TU BACKEND
+    const API_URL = 'http://api.newtalentloans.local'; // 👈 CAMBIA ESTO POR LA URL DE TU BACKEND
 
     // =========================================
     // FUNCIÓN PARA MOSTRAR EL MODAL
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function cargarEstadisticas() {
         console.log('📊 Cargando estadísticas del dashboard...');
 
-        fetch(API_URL + '/api/dashboard')
+        NTLApi.fetch(API_URL + '/?recurso=dashboard')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarModal('Cargando...', 'Obteniendo información de ' + label);
 
             // Llamada al backend
-            fetch(API_URL + '/api/dashboard/' + tipo)
+            NTLApi.fetch(API_URL + '/?recurso=dashboard/' + tipo)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
             mostrarModal('Cerrar Sesión', '¿Estás seguro de que deseas cerrar sesión?', function() {
                 // 🔌 Cuando tengas el login funcionando:
                 localStorage.removeItem('token');
-                fetch('api/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
+                NTLApi.fetch('http://api.newtalentloans.local/?recurso=cerrar-sesion', { method: 'POST', keepalive: true });
                     localStorage.removeItem('usuario');
                 
                 console.log('Sesión cerrada correctamente');
@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function cargarTablaPrestamos() {
         console.log('📋 Cargando últimos préstamos...');
 
-        fetch(API_URL + '/api/prestamos/ultimos')
+        NTLApi.fetch(API_URL + '/?recurso=prestamos&id=ultimos')
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
