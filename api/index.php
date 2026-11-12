@@ -64,6 +64,11 @@ try {
         ]);
     }
 
+    if ($resource === 'cambiar-contrasena' && $method === 'POST') {
+        ApiSupport::requireUser();
+        ApiSupport::out(200, ['success' => true, 'resultado' => AuthService::changePassword($db), 'message' => 'Contraseña actualizada correctamente.']);
+    }
+
     if ($resource === 'cerrar-sesion' && $method === 'POST') {
         if (isset($_SESSION['acceso_id'])) {
             ApiSupport::audit($db, 'Acceso', (string)$_SESSION['acceso_id'], 'LOGOUT');
@@ -237,13 +242,12 @@ try {
         ApiSupport::out(409, ['success' => false, 'message' => $message]);
     }
     error_log('NewTalentLoans SQL: ' . $error->getMessage());
-    ApiSupport::out(500, ['success' => false, 'message' => 'No se pudo completar la operación en la base de datos.']);
+    ApiSupport::out(500, ['success' => false, 'message' => $resource === 'sesion'
+        ? 'No se pudo validar el inicio de sesión. Verifique sus datos e intente nuevamente.'
+        : 'No se pudo completar la operación. Intente nuevamente.']);
 } catch (Throwable $error) {
     error_log('NewTalentLoans: ' . $error->getMessage());
-    $message = $error instanceof RuntimeException
-        ? $error->getMessage()
-        : 'Error al procesar la solicitud.';
-    ApiSupport::out(500, ['success' => false, 'message' => $message]);
+    ApiSupport::out(500, ['success' => false, 'message' => 'No se pudo completar la operación. Intente nuevamente.']);
 }
 
 

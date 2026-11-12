@@ -13,7 +13,7 @@ IF EXISTS(
     FROM inserted
     WHERE Pago_Estado<>N'Aplicado')
     THROW 50017, N'Un pago nuevo siempre debe iniciar en estado Aplicado.', 1;
-DECLARE @pid INT, @loan INT, @method INT, @client INT, @target INT, @amount DECIMAL(18, 2), @balance DECIMAL(18, 2), @loanState NVARCHAR(40), @owner INT, @remain DECIMAL(18, 2), @installment INT, @part DECIMAL(18, 2), @first BIT, @today DATE=CONVERT(date, SYSDATETIME());
+DECLARE @pid INT, @loan INT, @method INT, @client INT, @target INT, @amount DECIMAL(18, 2), @balance DECIMAL(18, 2), @loanState NVARCHAR(40), @owner INT, @remain DECIMAL(18, 2), @installment INT, @part DECIMAL(18, 2), @first BIT;
 DECLARE c CURSOR LOCAL FAST_FORWARD FOR
     SELECT Pago_ID, Prestamo_ID, MetodoPago_ID, Cliente_ID, Cuota_ID, Pago_Monto
     FROM inserted ORDER BY Pago_ID;
@@ -157,7 +157,7 @@ UPDATE Prestamo
 EstadoPrestamo_ID=CASE WHEN e.EstadoPrestamo_Nombre IN(N'Pagado', N'Finalizado') THEN COALESCE((
     SELECT TOP(1) EstadoPrestamo_ID
     FROM EstadoPrestamo
-    WHERE EstadoPrestamo_Nombre=N'Activo'), EstadoPrestamo_ID) ELSE EstadoPrestamo_ID
+    WHERE EstadoPrestamo_Nombre=N'Activo'), p.EstadoPrestamo_ID) ELSE p.EstadoPrestamo_ID
     END
 FROM Prestamo p
     JOIN EstadoPrestamo e ON e.EstadoPrestamo_ID=p.EstadoPrestamo_ID
@@ -253,20 +253,6 @@ IF EXISTS(
     JOIN EstadoSolicitud e ON e.EstadoSolicitud_ID=d.EstadoSolicitud_ID
     WHERE e.EstadoSolicitud_Nombre IN(N'Aprobada', N'Rechazada') AND (i.Cliente_ID<>d.Cliente_ID OR i.Solicitud_Monto<>d.Solicitud_Monto OR i.Solicitud_Plazo<>d.Solicitud_Plazo OR ISNULL(i.TipoPrestamo_ID, 0)<>ISNULL(d.TipoPrestamo_ID, 0)))
     THROW 50031, N'Una solicitud evaluada no puede cambiar de cliente, monto, plazo o tipo.', 1;
-IF EXISTS(
-    SELECT 1
-    FROM inserted i
-    JOIN deleted d ON d.Solicitud_ID=i.Solicitud_ID
-    JOIN TipoPrestamo t ON t.TipoPrestamo_ID=i.TipoPrestamo_ID
-    WHERE (i.Solicitud_Monto<>d.Solicitud_Monto OR ISNULL(i.TipoPrestamo_ID, 0)<>ISNULL(d.TipoPrestamo_ID, 0)) AND (i.Solicitud_Monto<t.TipoPrestamo_MontoMinimo OR i.Solicitud_Monto>t.TipoPrestamo_MontoMaximo))
-    THROW 50032, N'Monto fuera del rango permitido para el tipo de préstamo.', 1;
-IF EXISTS(
-    SELECT 1
-    FROM inserted i
-    JOIN deleted d ON d.Solicitud_ID=i.Solicitud_ID
-    JOIN TipoPrestamo t ON t.TipoPrestamo_ID=i.TipoPrestamo_ID
-    WHERE (i.Solicitud_Plazo<>d.Solicitud_Plazo OR ISNULL(i.TipoPrestamo_ID, 0)<>ISNULL(d.TipoPrestamo_ID, 0)) AND (i.Solicitud_Plazo<t.TipoPrestamo_PlazoMinimo OR i.Solicitud_Plazo>t.TipoPrestamo_PlazoMaximo))
-    THROW 50033, N'Plazo fuera del rango permitido para el tipo de préstamo.', 1;
 END
 GO
 CREATE OR ALTER TRIGGER TR_Prestamo_AfterUpdate ON Prestamo AFTER

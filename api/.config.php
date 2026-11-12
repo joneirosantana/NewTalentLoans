@@ -1,7 +1,7 @@
 <?php
 // Credenciales locales de prueba. En producción use variables de entorno y cambie estas claves.
 return [
-    'server' => getenv('NTL_DB_SERVER') ?: 'localhost\\SQLEXPRESS',
+    'server' => getenv('NTL_DB_SERVER') ?: 'HENRY\\SQLEXPRESS',
     'database' => getenv('NTL_DB_NAME') ?: 'NewTalentLoans',
     'username' => getenv('NTL_DB_USER') ?: '',
     'password' => getenv('NTL_DB_PASSWORD') ?: '',

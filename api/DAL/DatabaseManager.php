@@ -3,16 +3,34 @@ declare(strict_types=1);
 
 final class DatabaseManager
 {
+    private const READ_VIEWS = [
+        'Acceso' => 'vw_AccesosUsuario', 'Cliente' => 'vw_ClientesDetalle',
+        'Empresa' => 'vw_EmpresasResumen', 'Solicitud' => 'vw_SolicitudesDetalle',
+        'Prestamo' => 'vw_PrestamosResumen', 'Cuota' => 'vw_CuotasDetalle',
+        'Pago' => 'vw_PagosDetalle', 'PuntoPago' => 'vw_PuntosPagoActivos',
+        'TipoPrestamo' => 'vw_CatalogoTipoPrestamo', 'EstadoPrestamo' => 'vw_CatalogoEstadoPrestamo',
+        'MetodoPago' => 'vw_CatalogoMetodoPago', 'Moneda' => 'vw_CatalogoMoneda',
+        'TipoGarantia' => 'vw_CatalogoTipoGarantia', 'EstadoSolicitud' => 'vw_CatalogoEstadoSolicitud',
+        'Garante' => 'vw_GarantesDetalle', 'Garantia' => 'vw_GarantiasDetalle',
+        'Desembolso' => 'vw_DesembolsosDetalle', 'HistorialSolicitud' => 'vw_HistorialSolicitudesDetalle',
+        'Auditoria' => 'vw_AuditoriaDetalle',
+    ];
+
+    private static function readSource(string $table): string
+    {
+        return self::READ_VIEWS[$table] ?? $table;
+    }
+
     public static function getAll(PDO $db, string $table): array
     {
         self::identifier($table);
-        return $db->query("SELECT * FROM [$table]")->fetchAll();
+        return $db->query('SELECT * FROM [' . self::readSource($table) . ']')->fetchAll();
     }
 
     public static function getById(PDO $db, string $table, string $primaryKey, int $id): ?array
     {
         self::identifier($table); self::identifier($primaryKey);
-        $q = $db->prepare("SELECT * FROM [$table] WHERE [$primaryKey] = ?");
+        $q = $db->prepare('SELECT * FROM [' . self::readSource($table) . '] WHERE [' . $primaryKey . '] = ?');
         $q->execute([$id]);
         return $q->fetch() ?: null;
     }

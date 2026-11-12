@@ -2,9 +2,9 @@
 final class LoanService
 {
     private const CATALOGS = [
-        'tipos-prestamo' => ['TipoPrestamo', 'TipoPrestamo_ID', 'TipoPrestamo_Nombre'],
-        'metodos-pago' => ['MetodoPago', 'MetodoPago_ID', 'MetodoPago_Nombre'],
-        'monedas' => ['Moneda', 'Moneda_ID', 'Moneda_Codigo'],
+        'tipos-prestamo' => ['vw_CatalogoTipoPrestamo', 'TipoPrestamo_ID', 'TipoPrestamo_Nombre'],
+        'metodos-pago' => ['vw_CatalogoMetodoPago', 'MetodoPago_ID', 'MetodoPago_Nombre'],
+        'monedas' => ['vw_CatalogoMoneda', 'Moneda_ID', 'Moneda_Codigo'],
     ];
 
     public static function catalogs(PDO $db, string $name): array
@@ -15,11 +15,11 @@ final class LoanService
 
         [$table, $id, $label] = self::CATALOGS[$name];
         $columns = "[$id], [$label]";
-        if ($table === 'TipoPrestamo') {
+        if ($name === 'tipos-prestamo') {
             $columns .= ', TipoPrestamo_TasaBase';
         }
 
-        $filter = $table === 'Moneda' ? ' WHERE Moneda_Activa = 1' : '';
+        $filter = $name === 'monedas' ? ' WHERE Moneda_Activa = 1' : '';
         $sql = "SELECT $columns FROM [$table]$filter ORDER BY 2";
         return $db->query($sql)->fetchAll();
     }
@@ -72,59 +72,45 @@ final class LoanService
             $q = $db->prepare("SELECT COUNT(DISTINCT s.Solicitud_ID) solicitudes, COALESCE(SUM(DISTINCT p.Prestamo_Saldo),0) deuda,
                 COALESCE(SUM(CASE WHEN c.Cuota_Estado IN(N'Atrasada',N'Mora') THEN c.Cuota_Saldo ELSE 0 END),0) mora,
                 COALESCE(SUM(c.Cuota_Interes),0) interes
-                FROM Cliente cl LEFT JOIN Solicitud s ON s.Cliente_ID=cl.Cliente_ID
-                LEFT JOIN Prestamo p ON p.Solicitud_ID=s.Solicitud_ID
-                LEFT JOIN Cuota c ON c.Prestamo_ID=p.Prestamo_ID WHERE cl.Cliente_ID=?");
+                FROM vw_ClientesDetalle cl LEFT JOIN vw_SolicitudesDetalle s ON s.Cliente_ID=cl.Cliente_ID
+                LEFT JOIN vw_PrestamosResumen p ON p.Solicitud_ID=s.Solicitud_ID
+                LEFT JOIN vw_CuotasDetalle c ON c.Prestamo_ID=p.Prestamo_ID WHERE cl.Cliente_ID=?");
             $q->execute([$userId]);
             return $q->fetch() ?: [];
         }
         if (ApiSupport::companyId() !== null) {
-            $q = $db->prepare("SELECT COUNT(DISTINCT p.Prestamo_ID) prestamosActivos, COALESCE(SUM(p.Prestamo_Saldo),0) deuda,
-                (SELECT COUNT(*) FROM Solicitud ss JOIN EstadoSolicitud ee ON ee.EstadoSolicitud_ID=ss.EstadoSolicitud_ID JOIN Cliente cc ON cc.Cliente_ID=ss.Cliente_ID WHERE cc.Empresa_ID=? AND ee.EstadoSolicitud_Nombre=N'Pendiente') solicitudesPendientes,
-                COALESCE(SUM(CASE WHEN c.Cuota_Estado IN(N'Atrasada',N'Mora') THEN c.Cuota_Saldo ELSE 0 END),0) mora
-                FROM Prestamo p JOIN Solicitud s ON s.Solicitud_ID=p.Solicitud_ID JOIN Cliente cl ON cl.Cliente_ID=s.Cliente_ID
-                JOIN EstadoPrestamo e ON e.EstadoPrestamo_ID=p.EstadoPrestamo_ID LEFT JOIN Cuota c ON c.Prestamo_ID=p.Prestamo_ID
-                WHERE cl.Empresa_ID=? AND e.EstadoPrestamo_Nombre IN(N'Activo',N'Atrasado')");
-            $q->execute([ApiSupport::companyId(), ApiSupport::companyId()]);
+            $q = $db->prepare('SELECT TOP 1 PrestamosActivos, SolicitudesPendientes, Deuda AS deuda, Mora AS mora FROM vw_DashboardEmpresa WHERE Empresa_ID=?');
+            $q->execute([ApiSupport::companyId()]);
             return $q->fetch() ?: [];
         }
-        $stats = $db->query("SELECT COUNT(*) prestamosActivos, COALESCE(SUM(Prestamo_Saldo),0) deuda,
-            (SELECT COUNT(*) FROM Solicitud s JOIN EstadoSolicitud e ON e.EstadoSolicitud_ID=s.EstadoSolicitud_ID WHERE e.EstadoSolicitud_Nombre=N'Pendiente') solicitudesPendientes,
-            (SELECT COALESCE(SUM(Cuota_Saldo),0) FROM Cuota WHERE Cuota_Estado IN(N'Atrasada',N'Mora')) mora FROM Prestamo p JOIN EstadoPrestamo e ON e.EstadoPrestamo_ID=p.EstadoPrestamo_ID WHERE e.EstadoPrestamo_Nombre IN(N'Activo',N'Atrasado')")->fetch();
+        $stats = $db->query('SELECT PrestamosActivos AS prestamosActivos, SolicitudesPendientes AS solicitudesPendientes, Deuda AS deuda, Mora AS mora FROM vw_DashboardGlobal')->fetch();
         return $stats ?: [];
     }
 
     public static function myLoans(PDO $db, int $clientId): array
     {
-        $q = $db->prepare("SELECT p.Prestamo_ID, p.Prestamo_Monto, p.Prestamo_Tasa, p.Prestamo_Plazo,
-            p.Prestamo_FechaDesembolso, p.Prestamo_Saldo, e.EstadoPrestamo_Nombre estado,
-            COALESCE(SUM(CASE WHEN c.Cuota_Estado IN(N'Atrasada',N'Mora') THEN c.Cuota_Saldo ELSE 0 END),0) mora
-            FROM Prestamo p JOIN Solicitud s ON s.Solicitud_ID=p.Solicitud_ID
-            JOIN EstadoPrestamo e ON e.EstadoPrestamo_ID=p.EstadoPrestamo_ID
-            LEFT JOIN Cuota c ON c.Prestamo_ID=p.Prestamo_ID WHERE s.Cliente_ID=?
-            GROUP BY p.Prestamo_ID,p.Prestamo_Monto,p.Prestamo_Tasa,p.Prestamo_Plazo,p.Prestamo_FechaDesembolso,p.Prestamo_Saldo,e.EstadoPrestamo_Nombre ORDER BY p.Prestamo_ID DESC");
+        $q = $db->prepare("SELECT Prestamo_ID, Prestamo_Monto, Prestamo_Tasa, Prestamo_Plazo,
+            Prestamo_FechaDesembolso, Prestamo_Saldo, EstadoPrestamo_Nombre AS estado, mora
+            FROM vw_PrestamosResumen WHERE Cliente_ID=? ORDER BY Prestamo_ID DESC");
         $q->execute([$clientId]); return $q->fetchAll();
     }
 
     public static function myInstallments(PDO $db, int $clientId): array
     {
-        $q = $db->prepare("SELECT c.Cuota_ID,c.Prestamo_ID,c.Cuota_Numero,c.Cuota_FechaVencimiento,
-            c.Cuota_Capital,c.Cuota_Interes,c.Cuota_Monto,c.Cuota_Saldo,c.Cuota_Estado
-            FROM Cuota c JOIN Prestamo p ON p.Prestamo_ID=c.Prestamo_ID JOIN Solicitud s ON s.Solicitud_ID=p.Solicitud_ID
-            WHERE s.Cliente_ID=? ORDER BY c.Cuota_FechaVencimiento");
+        $q = $db->prepare("SELECT Cuota_ID,Prestamo_ID,Cuota_Numero,Cuota_FechaVencimiento,
+            Cuota_Capital,Cuota_Interes,Cuota_Monto,Cuota_Saldo,Cuota_Estado
+            FROM vw_CuotasDetalle WHERE Cliente_ID=? ORDER BY Cuota_FechaVencimiento");
         $q->execute([$clientId]); return $q->fetchAll();
     }
 
     private static function listarSolicitudes(PDO $db, int $clientId): array
     {
-        $sql = 'SELECT s.Solicitud_ID, s.Solicitud_Fecha, s.Solicitud_Monto,
-                       s.Solicitud_Plazo, s.Solicitud_Motivo,
-                       e.EstadoSolicitud_Nombre AS Solicitud_Estado
-                FROM Solicitud s
-                JOIN EstadoSolicitud e ON e.EstadoSolicitud_ID = s.EstadoSolicitud_ID';
+        $sql = 'SELECT Solicitud_ID, Solicitud_Fecha, Solicitud_Monto,
+                       Solicitud_Plazo, Solicitud_Motivo, Solicitud_Estado
+                FROM vw_SolicitudesDetalle';
 
         if (!ApiSupport::staff()) {
-            $sql .= ' WHERE s.Cliente_ID = ?';
+            $sql .= ' WHERE Cliente_ID = ?';
         }
         $sql .= ' ORDER BY s.Solicitud_Fecha DESC';
 

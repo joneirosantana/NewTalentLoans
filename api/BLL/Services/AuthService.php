@@ -82,15 +82,12 @@ final class AuthService
             ];
         }
 
-        $sql = 'SELECT a.Acceso_ID, a.Acceso_ContrasenaHash, a.Acceso_Activo,
-                       r.Rol_Nombre, c.Cliente_ID, c.Cliente_Nombre, c.Cliente_Apellido,
-                       e.Empleado_ID, e.Empleado_Nombre, e.Empleado_Apellido, e.Empleado_Cargo,
-                       a.Empresa_ID
-                FROM Acceso a
-                JOIN Rol r ON r.Rol_ID = a.Rol_ID
-                LEFT JOIN Cliente c ON c.Acceso_ID = a.Acceso_ID
-                LEFT JOIN Empleado e ON e.Acceso_ID = a.Acceso_ID
-                WHERE a.Acceso_Correo = ?';
+        $sql = 'SELECT Acceso_ID, Acceso_ContrasenaHash, Acceso_Activo,
+                       Rol_Nombre, Cliente_ID, Cliente_Nombre, Cliente_Apellido,
+                       Empleado_ID, Empleado_Nombre, Empleado_Apellido, Empleado_Cargo,
+                       Empresa_ID
+                FROM vw_AccesosUsuario
+                WHERE Acceso_Correo = ?';
         $query = $db->prepare($sql);
         $query->execute([$email]);
         $user = $query->fetch();
@@ -121,6 +118,27 @@ final class AuthService
             'empresaId' => $_SESSION['empresa_id'] ?: null,
             'esAdministrador' => $_SESSION['admin'],
         ];
+    }
+
+    public static function changePassword(PDO $db): array
+    {
+        if (ApiSupport::admin()) throw new InvalidArgumentException('La cuenta administrativa se gestiona en el backend.');
+        $data = ApiSupport::input();
+        $identifier = strtolower(ApiSupport::text($data, 'identificador', 254));
+        $current = (string)($data['passwordActual'] ?? '');
+        $new = (string)($data['passwordNueva'] ?? '');
+        if ($current === '' || strlen($new) < 8) throw new InvalidArgumentException('Complete las contraseñas correctamente.');
+        $accessId = (int)($_SESSION['acceso_id'] ?? 0);
+        if (!$accessId) throw new InvalidArgumentException('La sesión no tiene una cuenta válida.');
+        $q = $db->prepare('SELECT Acceso_ID, Acceso_Correo, Acceso_ContrasenaHash, Cliente_Cedula, Empleado_Cedula FROM vw_AccesosUsuario WHERE Acceso_ID=?');
+        $q->execute([$accessId]);
+        $account = $q->fetch();
+        $matches = $account && (strtolower((string)$account['Acceso_Correo']) === $identifier || strtolower((string)($account['Cliente_Cedula'] ?? '')) === $identifier || strtolower((string)($account['Empleado_Cedula'] ?? '')) === $identifier);
+        if (!$matches || !password_verify($current, $account['Acceso_ContrasenaHash'])) throw new InvalidArgumentException('El identificador o la contraseña actual no son correctos.');
+        $q = $db->prepare('UPDATE Acceso SET Acceso_ContrasenaHash=? WHERE Acceso_ID=?');
+        $q->execute([password_hash($new, PASSWORD_DEFAULT), $accessId]);
+        ApiSupport::audit($db, 'Acceso', (string)$accessId, 'UPDATE');
+        return ['actualizado' => true];
     }
 }
 

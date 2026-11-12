@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 window.location.href = destino;
             });
         }).catch(function (error) {
-            mostrarMensaje('No se pudo iniciar sesión', error.message || 'No se pudo conectar con el servidor.');
+            mostrarMensaje('No se pudo iniciar sesión', error.message || 'Verifique su correo y contraseña e intente nuevamente.');
         });
     });
 });

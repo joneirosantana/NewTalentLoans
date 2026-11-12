@@ -13,14 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
         cambiar: `${API_URL}/?recurso=cambiar-contrasena`
     };
 
-    // 👇 Cambia a FALSE cuando tengas tu backend listo
-    const MODO_SIMULACION = true;
 
     // =========================================
     // REFERENCIAS DEL DOM
     // =========================================
     const formCambiar = document.getElementById('formCambiarContrasena');
     const inputPasswordActual = document.getElementById('passwordActual');
+    const inputIdentificador = document.getElementById('identificador');
     const inputPasswordNueva = document.getElementById('passwordNueva');
     const inputPasswordConfirmar = document.getElementById('passwordConfirmar');
     const btnCancelar = document.getElementById('btnCancelar');
@@ -173,10 +172,11 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
 
         const passwordActual = inputPasswordActual.value.trim();
+        const identificador = inputIdentificador.value.trim();
         const passwordNueva = inputPasswordNueva.value.trim();
         const passwordConfirmar = inputPasswordConfirmar.value.trim();
 
-        if (!passwordActual || !passwordNueva || !passwordConfirmar) {
+        if (!identificador || !passwordActual || !passwordNueva || !passwordConfirmar) {
             mostrarModal('Campos Incompletos', 'Por favor complete todos los campos.');
             return;
         }
@@ -200,37 +200,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const datos = {
+            identificador: identificador,
             passwordActual: passwordActual,
             passwordNueva: passwordNueva
         };
 
         mostrarModal('Actualizando...', 'Cambiando tu contraseña, por favor espera...');
 
-        // 🔸 SIMULACIÓN
-        if (MODO_SIMULACION) {
-            setTimeout(() => {
-                cerrarModal();
-                mostrarModal(
-                    '✅ Contraseña Actualizada',
-                    'Tu contraseña ha sido cambiada correctamente. Ahora puedes iniciar sesión con tu nueva contraseña.',
-                    () => {
-                        // Redirigir al LOGIN
-                        window.location.href = 'iniciar-sesion.html';
-                    }
-                );
-            }, 1500);
-            return;
-        }
-
-        // 🔌 REAL
-        const token = localStorage.getItem('token');
-
         try {
             const response = await NTLApi.fetch(ENDPOINTS.cambiar, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(datos)
             });

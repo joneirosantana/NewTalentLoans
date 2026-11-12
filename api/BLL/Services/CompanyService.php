@@ -49,23 +49,18 @@ final class CompanyService
     public static function list(PDO $db): array
     {
         if (!ApiSupport::admin()) ApiSupport::out(403, ['success' => false, 'message' => 'Solo el administrador puede consultar empresas.']);
-        return $db->query("SELECT e.Empresa_ID,e.Empresa_Nombre,e.Empresa_RNC,e.Empresa_Correo,e.Empresa_Telefono,e.Empresa_Estado,
-            COUNT(DISTINCT c.Cliente_ID) clientes, COUNT(DISTINCT p.Prestamo_ID) prestamos,
-            COALESCE(SUM(p.Prestamo_Saldo),0) saldo
-            FROM Empresa e LEFT JOIN Cliente c ON c.Empresa_ID=e.Empresa_ID
-            LEFT JOIN Solicitud s ON s.Cliente_ID=c.Cliente_ID LEFT JOIN Prestamo p ON p.Solicitud_ID=s.Solicitud_ID
-            GROUP BY e.Empresa_ID,e.Empresa_Nombre,e.Empresa_RNC,e.Empresa_Correo,e.Empresa_Telefono,e.Empresa_Estado")->fetchAll();
+        return $db->query('SELECT * FROM vw_EmpresasResumen ORDER BY Empresa_Nombre')->fetchAll();
     }
 
     public static function paymentPoints(PDO $db): array
     {
         $companyId = ApiSupport::companyId();
         if ($companyId === null && !empty($_SESSION['cliente_id'])) {
-            $q = $db->prepare('SELECT Empresa_ID FROM Cliente WHERE Cliente_ID=?');
+            $q = $db->prepare('SELECT Empresa_ID FROM vw_ClientesDetalle WHERE Cliente_ID=?');
             $q->execute([(int)$_SESSION['cliente_id']]);
             $companyId = $q->fetchColumn() ?: null;
         }
-        $q = $db->prepare('SELECT PuntoPago_ID,PuntoPago_Nombre,PuntoPago_Direccion,PuntoPago_Horario,PuntoPago_Telefono FROM PuntoPago WHERE PuntoPago_Activo=1 AND (Empresa_ID IS NULL OR Empresa_ID=?) ORDER BY PuntoPago_Nombre');
+        $q = $db->prepare('SELECT PuntoPago_ID,PuntoPago_Nombre,PuntoPago_Direccion,PuntoPago_Horario,PuntoPago_Telefono FROM vw_PuntosPagoActivos WHERE Empresa_ID IS NULL OR Empresa_ID=? ORDER BY PuntoPago_Nombre');
         $q->execute([$companyId]); return $q->fetchAll();
     }
 
@@ -83,6 +78,6 @@ final class CompanyService
 
     public static function publicList(PDO $db): array
     {
-        return $db->query("SELECT Empresa_ID,Empresa_Nombre,Empresa_RNC FROM Empresa WHERE Empresa_Estado=N'Activa' ORDER BY Empresa_Nombre")->fetchAll();
+        return $db->query('SELECT Empresa_ID,Empresa_Nombre,Empresa_RNC FROM vw_EmpresasPublicas ORDER BY Empresa_Nombre')->fetchAll();
     }
 }

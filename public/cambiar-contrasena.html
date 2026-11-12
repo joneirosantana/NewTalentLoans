@@ -31,9 +31,13 @@
             </div>
 
             <h1 class="titulo">Cambiar Contraseña</h1>
-            <p class="instruction">Ingrese su contraseña actual y la nueva</p>
+            <p class="instruction">Confirma tu identidad y establece una nueva contraseña</p>
 
             <form id="formCambiarContrasena" novalidate>
+                <div class="input-group">
+                    <input type="text" id="identificador" name="identificador" placeholder="Correo o cédula" required autocomplete="username">
+                    <label for="identificador">Correo o cédula:</label>
+                </div>
                 
                 <!-- Contraseña Actual -->
                 <div class="input-group">

@@ -4,25 +4,14 @@ IF DB_ID(N'NewTalentLoans') IS NULL
 GO
 USE NewTalentLoans;
 GO
-CREATE TABLE Provincia (
-Provincia_ID INT IDENTITY(1, 1) PRIMARY KEY,
-Provincia_Nombre NVARCHAR(100) NOT NULL UNIQUE
-);
-CREATE TABLE Ciudad (
-Ciudad_ID INT IDENTITY(1, 1) PRIMARY KEY,
-Provincia_ID INT NOT NULL,
-Ciudad_Nombre NVARCHAR(100) NOT NULL,
-CONSTRAINT UQ_Ciudad_Provincia_Nombre UNIQUE (Provincia_ID, Ciudad_Nombre),
-FOREIGN KEY (Provincia_ID) REFERENCES Provincia(Provincia_ID)
-);
 CREATE TABLE Direccion (
 Direccion_ID INT IDENTITY(1, 1) PRIMARY KEY,
-Ciudad_ID INT NOT NULL,
+Direccion_Provincia NVARCHAR(100) NOT NULL,
+Direccion_Ciudad NVARCHAR(100) NOT NULL,
 Direccion_Calle NVARCHAR(150) NOT NULL,
 Direccion_Numero NVARCHAR(20) NULL,
 Direccion_Sector NVARCHAR(100) NULL,
-Direccion_Descripcion NVARCHAR(500) NULL,
-FOREIGN KEY (Ciudad_ID) REFERENCES Ciudad(Ciudad_ID)
+Direccion_Descripcion NVARCHAR(500) NULL
 );
 CREATE TABLE Empresa (
 Empresa_ID INT IDENTITY(1,1) PRIMARY KEY,
@@ -299,17 +288,6 @@ CREATE INDEX IX_Pago_Prestamo ON Pago(Prestamo_ID);
 CREATE INDEX IX_Pago_Cliente ON Pago(Cliente_ID);
 CREATE INDEX IX_HistorialSolicitud_Solicitud ON HistorialSolicitud(Solicitud_ID);
 CREATE INDEX IX_DocumentoSolicitud_Solicitud ON DocumentoSolicitud(Solicitud_ID);
-GO
-CREATE VIEW vw_ClienteEstadoFinanciero AS
-SELECT c.Cliente_ID, c.Cliente_Nombre, c.Cliente_Apellido, c.Cliente_Sueldo,
-       COALESCE(SUM(p.Prestamo_Saldo), 0) AS DeudaPendiente,
-       COALESCE(SUM(CASE WHEN q.Cuota_Estado IN (N'Atrasada', N'Mora') THEN q.Cuota_Saldo ELSE 0 END), 0) AS Mora,
-       COALESCE(SUM(q.Cuota_Interes), 0) AS Interes
-FROM Cliente c
-LEFT JOIN Solicitud s ON s.Cliente_ID = c.Cliente_ID
-LEFT JOIN Prestamo p ON p.Solicitud_ID = s.Solicitud_ID
-LEFT JOIN Cuota q ON q.Prestamo_ID = p.Prestamo_ID
-GROUP BY c.Cliente_ID, c.Cliente_Nombre, c.Cliente_Apellido, c.Cliente_Sueldo;
 GO
 CREATE TABLE PagoCuota(
 PagoCuota_ID INT IDENTITY PRIMARY KEY,

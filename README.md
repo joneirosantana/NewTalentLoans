@@ -2,7 +2,7 @@
 
 El proyecto separa la GUI en `public/` y la API en `api/`. En local la GUI se sirve en `http://newtalentloans.local` y consume `http://api.newtalentloans.local/?recurso=...`. La configuración privada está en `api/.config.php`.
 
-La versión 2.0 incorpora dashboard de cliente con solicitudes, préstamos, cuotas, deuda, interés y mora; dashboard interno por rol; y roles de empleado para RRHH, Contabilidad, Solicitudes y Gerencia. La dirección mantiene Provincia, Ciudad y los datos de calle/sector normalizados.
+La versión 2.0 incorpora dashboard de cliente con solicitudes, préstamos, cuotas, deuda, interés y mora; dashboard interno por rol; y roles de empleado para RRHH, Contabilidad, Solicitudes y Gerencia. La tabla `Direccion` integra Provincia, Ciudad y los datos de calle/sector.
 
 El registro clasifica automáticamente como empleado cualquier correo cuyo dominio termine en `@newtalentloans.com`; esas cuentas quedan pendientes y desactivadas hasta la revisión de RRHH. Todos los demás dominios se registran como clientes.
 
@@ -12,7 +12,7 @@ Para Apache, copie `apache-vhosts.conf` al archivo de VirtualHosts, habilite `mo
 
 1. Configure `server`, `database`, `username` y `password` en `api/.config.php`, o use `NTL_DB_SERVER`, `NTL_DB_NAME`, `NTL_DB_USER` y `NTL_DB_PASSWORD`.
 2. Active PDO_SQLSRV en PHP y habilite `mod_rewrite` y `.htaccess` en Apache. Sirva la carpeta por HTTP.
-3. En la primera solicitud a la API, si la base no existe o está vacía, el sistema instala el esquema completo, los triggers, los procedimientos, roles, catálogos y registros ficticios. La cuenta administrativa se valida exclusivamente en `api/admin.php`; no se crea en `Rol`, `Acceso` ni `Empleado`.
+3. En la primera solicitud a la API, si la base no existe o está vacía, el sistema instala el esquema completo, `vistas.sql`, los triggers, los procedimientos, roles, catálogos y registros ficticios. La cuenta administrativa se valida exclusivamente en `api/admin.php`; no se crea en `Rol`, `Acceso` ni `Empleado`.
 4. Cambie las claves de prueba antes de compartir el entorno. Para producción use variables de entorno y un usuario SQL de permisos limitados.
 
 Credenciales locales: administrador `admin@newtalentloans.local` / `Demo1234!`, definidas en `api/admin.php`; cliente de prueba `cliente@newtalentloans.local` / `Cliente123!`. No se crea un empleado demo.

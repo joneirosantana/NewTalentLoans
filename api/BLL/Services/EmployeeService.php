@@ -41,13 +41,8 @@ final class EmployeeService
         if (!ApiSupport::role('Administrador', 'RRHH')) {
             ApiSupport::out(403, ['success' => false, 'message' => 'Solo RRHH puede revisar empleados pendientes.']);
         }
-        $companyFilter = ApiSupport::admin() ? '' : ' AND a.Empresa_ID=' . (int)ApiSupport::companyId();
-        return $db->query("SELECT e.Empleado_ID, e.Empleado_Nombre, e.Empleado_Apellido,
-            e.Empleado_Cedula, e.Empleado_Cargo, e.Empleado_Estado,
-            a.Acceso_ID, a.Acceso_Correo, d.Departamento_ID, d.Departamento_Nombre
-            FROM Empleado e JOIN Acceso a ON a.Acceso_ID=e.Acceso_ID
-            JOIN Departamento d ON d.Departamento_ID=e.Departamento_ID
-            JOIN Rol r ON r.Rol_ID=a.Rol_ID WHERE r.Rol_Nombre=N'Pendiente'" . $companyFilter . " ORDER BY e.Empleado_FechaIngreso")->fetchAll();
+        $companyFilter = ApiSupport::admin() ? '' : ' AND Empresa_ID=' . (int)ApiSupport::companyId();
+        return $db->query("SELECT * FROM vw_EmpleadosPendientes WHERE 1=1" . $companyFilter . " ORDER BY Empleado_FechaIngreso")->fetchAll();
     }
 
     public static function assignRole(PDO $db): array

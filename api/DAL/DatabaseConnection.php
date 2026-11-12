@@ -52,6 +52,7 @@ final class DatabaseConnection
     {
         $files = [
             __DIR__ . '/../database/03_creacion_base_datos.sql',
+            __DIR__ . '/../database/vistas.sql',
             __DIR__ . '/../database/02_triggers.sql',
             __DIR__ . '/../database/01_stored_procedures.sql',
         ];
@@ -105,11 +106,9 @@ final class DatabaseConnection
 
             $config = require __DIR__ . '/../.config.php';
             $clientRole = (int)$db->query("SELECT Rol_ID FROM Rol WHERE Rol_Nombre = N'Cliente'")->fetchColumn();
-            $cityId = self::demoCity($db);
-
             self::seedPerson(
                 $db, $config['demo_client_email'], $config['demo_client_password'],
-                $clientRole, 'Ana', 'Prueba', '000-0000000-1', $cityId, true
+                $clientRole, 'Ana', 'Prueba', '000-0000000-1', true
             );
             $db->commit();
         } catch (Throwable $error) {
@@ -130,21 +129,6 @@ final class DatabaseConnection
         $query->execute([$value, $value]);
     }
 
-    private static function demoCity(PDO $db): int
-    {
-        $cityId = (int)$db->query('SELECT TOP 1 Ciudad_ID FROM Ciudad')->fetchColumn();
-        if ($cityId > 0) {
-            return $cityId;
-        }
-
-        $db->exec(
-            "INSERT INTO Provincia(Provincia_Nombre) VALUES (N'Distrito Nacional');
-             INSERT INTO Ciudad(Provincia_ID, Ciudad_Nombre)
-             VALUES (SCOPE_IDENTITY(), N'Santo Domingo')"
-        );
-        return (int)$db->query('SELECT TOP 1 Ciudad_ID FROM Ciudad ORDER BY Ciudad_ID DESC')->fetchColumn();
-    }
-
     private static function seedPerson(
         PDO $db,
         string $email,
@@ -153,7 +137,6 @@ final class DatabaseConnection
         string $firstName,
         string $lastName,
         string $identityNumber,
-        int $cityId,
         bool $isClient,
         bool $active = true
     ): void {
@@ -170,8 +153,8 @@ final class DatabaseConnection
         $query->execute([$roleId, $email, password_hash($password, PASSWORD_DEFAULT), $active ? 1 : 0]);
         $accessId = (int)$db->query('SELECT TOP 1 Acceso_ID FROM Acceso ORDER BY Acceso_ID DESC')->fetchColumn();
 
-        $query = $db->prepare('INSERT INTO Direccion(Ciudad_ID, Direccion_Calle) VALUES (?, ?)');
-        $query->execute([$cityId, 'Calle de Prueba']);
+        $query = $db->prepare("INSERT INTO Direccion(Direccion_Provincia, Direccion_Ciudad, Direccion_Calle) VALUES (N'Distrito Nacional', N'Santo Domingo', ?)");
+        $query->execute(['Calle de Prueba']);
         $addressId = (int)$db->query('SELECT TOP 1 Direccion_ID FROM Direccion ORDER BY Direccion_ID DESC')->fetchColumn();
 
         if ($isClient) {

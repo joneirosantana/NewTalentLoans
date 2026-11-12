@@ -10,7 +10,7 @@ final class PaymentService
         }
         $data = ApiSupport::input();
         $pointId = (int)($data['puntoPagoId'] ?? 0);
-        $q = $db->prepare('SELECT Empresa_ID FROM PuntoPago WHERE PuntoPago_ID=? AND PuntoPago_Activo=1');
+        $q = $db->prepare('SELECT Empresa_ID FROM vw_PuntosPagoActivos WHERE PuntoPago_ID=?');
         $q->execute([$pointId]);
         if (!$q->fetch()) throw new InvalidArgumentException('Seleccione un punto de pago activo.');
         $result = Pago::registrar($db, [

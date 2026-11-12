@@ -59,25 +59,17 @@ final class EntityService
     private static function listClients(PDO $db, ?int $id): array
     {
         if (ApiSupport::admin() || ApiSupport::readOnlyCompany()) {
-            $query = $db->query('SELECT e.Empresa_ID, e.Empresa_Nombre,
-                COUNT(DISTINCT c.Cliente_ID) clientes,
-                COALESCE(SUM(c.Cliente_Sueldo),0) sueldo_total,
-                COALESCE(SUM(p.Prestamo_Saldo),0) deuda_total
-                FROM Empresa e LEFT JOIN Cliente c ON c.Empresa_ID=e.Empresa_ID
-                LEFT JOIN Solicitud s ON s.Cliente_ID=c.Cliente_ID
-                LEFT JOIN Prestamo p ON p.Solicitud_ID=s.Solicitud_ID
-                GROUP BY e.Empresa_ID,e.Empresa_Nombre ORDER BY e.Empresa_Nombre');
+            $query = $db->query("SELECT Empresa_ID, Empresa_Nombre, clientes, sueldo_total, deuda_total,
+                N'agregada' AS privacidad FROM vw_EmpresasResumen ORDER BY Empresa_Nombre");
             return ['datos' => $query->fetchAll(), 'privacidad' => 'agregada'];
         }
         $sql = 'SELECT c.Cliente_ID, c.Cliente_Nombre, c.Cliente_Apellido,
                        c.Cliente_Cedula, c.Cliente_Sueldo, a.Acceso_Correo,
-                       a.Acceso_Activo, d.Direccion_Calle, d.Direccion_Numero,
-                       d.Direccion_Sector, ci.Ciudad_Nombre, p.Provincia_Nombre
+                       a.Acceso_Activo, d.Direccion_Provincia, d.Direccion_Ciudad,
+                       d.Direccion_Calle, d.Direccion_Numero, d.Direccion_Sector
                 FROM Cliente c
                 JOIN Acceso a ON a.Acceso_ID = c.Acceso_ID
-                JOIN Direccion d ON d.Direccion_ID = c.Direccion_ID
-                JOIN Ciudad ci ON ci.Ciudad_ID = d.Ciudad_ID
-                JOIN Provincia p ON p.Provincia_ID = ci.Provincia_ID';
+                JOIN Direccion d ON d.Direccion_ID = c.Direccion_ID';
         $params = [];
         if ($id !== null) {
             $sql .= ' WHERE c.Cliente_ID = ?';
